@@ -55,7 +55,6 @@ export const parseTaskDate = (dateString) => {
 export const filterTasksByDateRange = (tasks, range) => {
   const filterTask = (task) => {
     const taskDate = parseTaskDate(task.createdAt);
-    const isInRange = taskDate && isWithinInterval(taskDate, range);
     
     return {
       ...task,
@@ -256,7 +255,6 @@ export const csvToTasks = (csvContent) => {
   const lines = csvContent.trim().split('\n');
   if (lines.length < 2) return [];
   
-  const headers = parseCSVLine(lines[0]);
   const taskMap = new Map();
   const rootTasks = [];
   
