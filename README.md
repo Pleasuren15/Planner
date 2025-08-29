@@ -13,11 +13,7 @@ Clean, responsive UI
 
 🛠️ Tech Stack
 
-Frontend: [React / Angular / Blazor]
-
-Backend: [.NET Web API / Node.js / Django]
-
-Database: [SQL Server / MongoDB / SQLite]
+Frontend: [React]
 
 🎯 Purpose
 A lightweight productivity tool and a showcase project for practicing full-stack development, operations, and modern design patterns.
