@@ -54,7 +54,6 @@ export const parseTaskDate = (dateString) => {
 
 export const filterTasksByDateRange = (tasks, range) => {
   const filterTask = (task) => {
-    const taskDate = parseTaskDate(task.createdAt);
     
     return {
       ...task,
