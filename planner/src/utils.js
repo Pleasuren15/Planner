@@ -20,11 +20,16 @@ import {
   parseISO,
   isValid
 } from 'date-fns';
+import { 
+  BLOB_STORAGE_CONFIG, 
+  APP_CONFIG, 
+  getTasksBlobUrl 
+} from './config';
 
 // ========== DATE UTILITIES ==========
 export const getCurrentWeekRange = (date = new Date()) => ({
-  start: startOfWeek(date, { weekStartsOn: 1 }),
-  end: endOfWeek(date, { weekStartsOn: 1 })
+  start: startOfWeek(date, { weekStartsOn: APP_CONFIG.WEEK_STARTS_ON }),
+  end: endOfWeek(date, { weekStartsOn: APP_CONFIG.WEEK_STARTS_ON })
 });
 
 export const getCurrentMonthRange = (date = new Date()) => ({
@@ -95,7 +100,7 @@ export const navigateDate = (currentDate, direction, type = 'week') => {
 export const isCurrentPeriod = (date, type = 'week', referenceDate = new Date()) => {
   switch (type) {
     case 'week':
-      return isSameWeek(date, referenceDate, { weekStartsOn: 1 });
+      return isSameWeek(date, referenceDate, { weekStartsOn: APP_CONFIG.WEEK_STARTS_ON });
     case 'month':
       return isSameMonth(date, referenceDate);
     case 'year':
@@ -110,7 +115,14 @@ export const createDateString = (date = new Date()) => {
 };
 
 // ========== TASK UTILITIES ==========
-export const createTask = (title, description = '', dueDate = null, parentId = null, category = 'personal', priority = 'medium') => ({
+export const createTask = (
+  title, 
+  description = '', 
+  dueDate = null, 
+  parentId = null, 
+  category = APP_CONFIG.DEFAULT_TASK.CATEGORY, 
+  priority = APP_CONFIG.DEFAULT_TASK.PRIORITY
+) => ({
   id: uuidv4(),
   title,
   description,
@@ -283,7 +295,7 @@ export const csvToTasks = (csvContent) => {
 // Configuration for Azure Blob Storage
 let blobConfig = {
   connectionString: '',
-  containerName: 'tasks',
+  containerName: BLOB_STORAGE_CONFIG.DEFAULT_CONTAINER,
   accountName: '',
   accountKey: '',
   enabled: false
@@ -307,7 +319,7 @@ const parseConnectionString = (connectionString) => {
 };
 
 // Set blob storage configuration
-export const configureBlobStorage = (connectionString, containerName = 'tasks') => {
+export const configureBlobStorage = (connectionString, containerName = BLOB_STORAGE_CONFIG.DEFAULT_CONTAINER) => {
   const parsed = parseConnectionString(connectionString);
   
   blobConfig = {
@@ -320,13 +332,13 @@ export const configureBlobStorage = (connectionString, containerName = 'tasks') 
   };
   
   // Store config in localStorage for persistence
-  localStorage.setItem('blobConfig', JSON.stringify(blobConfig));
+  localStorage.setItem(APP_CONFIG.STORAGE_KEYS.BLOB_CONFIG, JSON.stringify(blobConfig));
 };
 
 // Load blob configuration from localStorage
 export const loadBlobConfig = () => {
   try {
-    const stored = localStorage.getItem('blobConfig');
+    const stored = localStorage.getItem(APP_CONFIG.STORAGE_KEYS.BLOB_CONFIG);
     if (stored) {
       blobConfig = JSON.parse(stored);
     }
@@ -359,7 +371,7 @@ const generateAuthHeader = async (method, url, contentLength = 0, contentType = 
   
   const now = new Date().toUTCString();
   const xMsDate = now;
-  const xMsVersion = '2020-10-02';
+  const xMsVersion = BLOB_STORAGE_CONFIG.API_VERSION;
   
   const stringToSign = [
     method,
@@ -398,7 +410,7 @@ export const saveTasksToBlob = async (tasks) => {
 
   try {
     const csvContent = tasksToCSV(tasks);
-    const blobUrl = `http://localhost:10000/devstoreaccount1/tasks/tasks.csv`;
+    const blobUrl = getTasksBlobUrl(blobConfig.accountName);
     console.log('Saving tasks to blob URL:', blobUrl);
     
     const headers = await generateAuthHeader('PUT', blobUrl, csvContent.length, 'text/csv');
@@ -433,7 +445,7 @@ export const loadTasksFromBlob = async () => {
   }
 
   try {
-    const blobUrl = `http://localhost:10000/devstoreaccount1/tasks/tasks.csv`;    
+    const blobUrl = getTasksBlobUrl(blobConfig.accountName);    
     const headers = await generateAuthHeader('GET', blobUrl);
     
     const response = await fetch(blobUrl, {
@@ -464,7 +476,7 @@ export const loadTasksFromBlob = async () => {
 export const saveTasks = async (tasks) => {
   try {
     const csvContent = tasksToCSV(tasks);
-    localStorage.setItem('plannerTasks', csvContent);
+    localStorage.setItem(APP_CONFIG.STORAGE_KEYS.TASKS, csvContent);
     
     // Also save to blob storage if configured
     if (blobConfig.enabled) {
@@ -499,7 +511,7 @@ export const loadTasks = async () => {
     }
     
     // Fallback to localStorage
-    const csvContent = localStorage.getItem('plannerTasks');
+    const csvContent = localStorage.getItem(APP_CONFIG.STORAGE_KEYS.TASKS);
     if (csvContent) {
       console.log('Loaded tasks from localStorage');
       return csvToTasks(csvContent);
@@ -538,7 +550,7 @@ export const importTasksFromFile = (file) => {
       try {
         const csvContent = e.target.result;
         const tasks = csvToTasks(csvContent);
-        localStorage.setItem('plannerTasks', csvContent);
+        localStorage.setItem(APP_CONFIG.STORAGE_KEYS.TASKS, csvContent);
         resolve(tasks);
       } catch (error) {
         reject(error);

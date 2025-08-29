@@ -17,6 +17,7 @@ import {
   navigateDate,
   isCurrentPeriod,
 } from "./utils";
+import { APP_CONFIG, BLOB_STORAGE_CONFIG } from "./config";
 import "./TaskManager.css";
 
 // Custom Chart Component
@@ -326,11 +327,11 @@ const TaskManager = () => {
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskDescription, setNewTaskDescription] = useState("");
   const [newTaskDueDate, setNewTaskDueDate] = useState("");
-  const [newTaskCategory, setNewTaskCategory] = useState("personal"); // 'personal' or 'work'
-  const [newTaskPriority, setNewTaskPriority] = useState("medium"); // 'low', 'medium', 'high'
+  const [newTaskCategory, setNewTaskCategory] = useState(APP_CONFIG.DEFAULT_TASK.CATEGORY); // 'personal' or 'work'
+  const [newTaskPriority, setNewTaskPriority] = useState(APP_CONFIG.DEFAULT_TASK.PRIORITY); // 'low', 'medium', 'high'
   const [showBlobConfig, setShowBlobConfig] = useState(false);
   const [blobConnectionString, setBlobConnectionString] = useState("");
-  const [blobContainerName, setBlobContainerName] = useState("tasks");
+  const [blobContainerName, setBlobContainerName] = useState(BLOB_STORAGE_CONFIG.DEFAULT_CONTAINER);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all"); // 'all', 'completed', 'pending'
   const [showChart, setShowChart] = useState(false);
@@ -604,8 +605,8 @@ const TaskManager = () => {
       setNewTaskTitle("");
       setNewTaskDescription("");
       setNewTaskDueDate("");
-      setNewTaskCategory("personal");
-      setNewTaskPriority("medium");
+      setNewTaskCategory(APP_CONFIG.DEFAULT_TASK.CATEGORY);
+      setNewTaskPriority(APP_CONFIG.DEFAULT_TASK.PRIORITY);
       setShowAddTask(false);
     }
   };
@@ -1017,8 +1018,8 @@ const TaskManager = () => {
                         setNewTaskTitle("");
                         setNewTaskDescription("");
                         setNewTaskDueDate("");
-                        setNewTaskCategory("personal");
-                        setNewTaskPriority("medium");
+                        setNewTaskCategory(APP_CONFIG.DEFAULT_TASK.CATEGORY);
+                        setNewTaskPriority(APP_CONFIG.DEFAULT_TASK.PRIORITY);
                       }}
                       className="btn-cancel"
                     >
