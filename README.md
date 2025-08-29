@@ -1,2 +1,23 @@
 # Planner
-A simple, responsive, and user-friendly To-Do list application designed to help me organize tasks, set priorities, and manage daily activities efficiently across devices.
+A simple and intuitive To-Do list application to help ME stay organized and productive.
+
+✨ Features
+
+Add, edit, and delete tasks
+
+Mark tasks as completed or pending
+
+Set priorities and deadlines
+
+Clean, responsive UI
+
+🛠️ Tech Stack
+
+Frontend: [React / Angular / Blazor]
+
+Backend: [.NET Web API / Node.js / Django]
+
+Database: [SQL Server / MongoDB / SQLite]
+
+🎯 Purpose
+A lightweight productivity tool and a showcase project for practicing full-stack development, operations, and modern design patterns.
