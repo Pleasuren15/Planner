@@ -20,7 +20,6 @@ import {
   parseISO,
   isValid
 } from 'date-fns';
-import { GOOGLE_SHEETS_CONFIG } from './config';
 
 // ========== DATE UTILITIES ==========
 export const getCurrentWeekRange = (date = new Date()) => ({
@@ -272,109 +271,28 @@ export const csvToTasks = (csvContent) => {
   return rootTasks;
 };
 
-// ========== GOOGLE SHEETS INTEGRATION ==========
-export const loadTasksFromGoogleSheets = async () => {
-  try {
-    if (!GOOGLE_SHEETS_CONFIG.APPS_SCRIPT_URL) {
-      throw new Error('Google Apps Script URL not configured');
-    }
-
-    // Use Google Apps Script for reading (bypasses CORS)
-    const response = await fetch(GOOGLE_SHEETS_CONFIG.APPS_SCRIPT_URL, {
-      method: 'GET',
-      mode: 'cors',
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Apps Script error: ${response.status}`);
-    }
-    
-    const result = await response.json();
-    
-    if (result.success && result.data) {
-      // Cache the data locally
-      const csvContent = tasksToCSV(result.data);
-      localStorage.setItem('plannerTasks', csvContent);
-      console.info('✅ Tasks loaded successfully from Google Sheets via Apps Script');
-      return result.data;
-    } else {
-      throw new Error(result.error || 'Unknown Apps Script error');
-    }
-    
-  } catch (error) {
-    console.error('Error loading from Google Apps Script:', error);
-    console.info('💡 Falling back to local storage');
-    
-    // Fallback to localStorage
-    const localContent = localStorage.getItem('plannerTasks');
-    return localContent ? csvToTasks(localContent) : [];
-  }
-};
-
-export const saveTasksToGoogleSheets = async (tasks) => {
+export const saveTasks = async (tasks) => {
   try {
     const csvContent = tasksToCSV(tasks);
-    
-    // Save locally first (always)
     localStorage.setItem('plannerTasks', csvContent);
-    
-    // Write to Google Sheets via Apps Script
-    if (!GOOGLE_SHEETS_CONFIG.APPS_SCRIPT_URL) {
-      console.warn('⚠️ Google Apps Script URL not configured');
-      return true;
-    }
-
-    try {
-      const response = await fetch(GOOGLE_SHEETS_CONFIG.APPS_SCRIPT_URL, {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'updateTasks',
-          data: tasks
-        })
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Apps Script HTTP error: ${response.status}`);
-      }
-      
-      const result = await response.json();
-      
-      if (result.success) {
-        console.info('✅ Tasks successfully written to Google Sheets via Apps Script');
-        return true;
-      } else {
-        throw new Error(result.error || 'Apps Script returned error');
-      }
-      
-    } catch (apiError) {
-      console.error('Google Apps Script write error:', apiError);
-      console.warn('⚠️ Google Sheets write failed - tasks saved locally only');
-      return true; // Still saved locally
-    }
-    
+    return true;
   } catch (error) {
-    console.error('Error in saveTasksToGoogleSheets:', error);
+    console.error('Error saving tasks:', error);
     return false;
   }
 };
 
-// Helper function to open Google Sheets in new tab for manual update
-export const openGoogleSheetForUpdate = () => {
-  const sheetUrl = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEETS_CONFIG.SHEET_ID}/edit`;
-  window.open(sheetUrl, '_blank');
-};
-
-// Updated main functions to use Google Sheets
-export const saveTasks = async (tasks) => {
-  return await saveTasksToGoogleSheets(tasks);
-};
-
 export const loadTasks = async () => {
-  return await loadTasksFromGoogleSheets();
+  try {
+    const csvContent = localStorage.getItem('plannerTasks');
+    if (csvContent) {
+      return csvToTasks(csvContent);
+    }
+    return [];
+  } catch (error) {
+    console.error('Error loading tasks:', error);
+    return [];
+  }
 };
 
 export const exportTasks = async (tasks) => {

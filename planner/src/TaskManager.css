@@ -409,7 +409,7 @@ body {
   gap: 8px;
 }
 
-.btn-export, .btn-import, .btn-sync, .btn-setup, .btn-open-sheet {
+.btn-export, .btn-import {
   background: var(--ms-bg-tertiary);
   color: var(--ms-text-primary);
   border: 1px solid var(--ms-border-color);
@@ -426,24 +426,6 @@ body {
   background: var(--ms-blue-primary);
   color: white;
   border-color: var(--ms-blue-primary);
-}
-
-.btn-sync:hover {
-  background: var(--ms-green-primary);
-  color: white;
-  border-color: var(--ms-green-primary);
-}
-
-.btn-setup:hover {
-  background: var(--ms-purple-primary);
-  color: white;
-  border-color: var(--ms-purple-primary);
-}
-
-.btn-open-sheet:hover {
-  background: var(--ms-orange-primary);
-  color: white;
-  border-color: var(--ms-orange-primary);
 }
 
 .add-task-form {

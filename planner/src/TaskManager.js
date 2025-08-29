@@ -14,9 +14,7 @@ import {
   loadTasks,
   saveTasks,
   exportTasks,
-  importTasksFromFile,
-  loadTasksFromGoogleSheets,
-  openGoogleSheetForUpdate
+  importTasksFromFile
 } from './utils';
 import './TaskManager.css';
 
@@ -279,17 +277,10 @@ const TaskManager = () => {
     setIsDarkMode(prev => !prev);
   };
 
-  // Save tasks to storage and Google Sheets
+  // Save tasks to storage
   const saveTasksToStorage = useCallback(async (updatedTasks) => {
     try {
-      const success = await saveTasks(updatedTasks);
-      
-      if (success) {
-        console.info('✅ Tasks saved successfully to Google Sheets!');
-      } else {
-        console.warn('⚠️ Google Sheets sync failed - tasks saved locally');
-      }
-      
+      await saveTasks(updatedTasks);
       setError(null);
     } catch (err) {
       setError('Failed to save tasks');
@@ -446,68 +437,8 @@ const TaskManager = () => {
     }
   };
 
-  const handleExportTasks = async () => {
+  const handleExportTasks = () => {
     exportTasks(tasks);
-    alert('📊 Tasks exported as CSV file! \n\n💡 Note: Your tasks are automatically synced to Google Sheets now!');
-  };
-
-  const handleSyncFromSheets = async () => {
-    try {
-      setLoading(true);
-      const sheetsData = await loadTasksFromGoogleSheets();
-      setTasks(sheetsData);
-      
-      if (sheetsData.length > 0) {
-        alert('🔄 Tasks synced from Google Sheets successfully!');
-      } else {
-        alert('📋 Google Sheets is empty or inaccessible. Using local data.\n\n💡 Make sure your Google Sheet is public or has the correct headers.');
-      }
-      
-      setError(null);
-    } catch (err) {
-      setError('Failed to sync from Google Sheets');
-      alert(`❌ Google Sheets sync failed. 
-
-SOLUTIONS:
-1️⃣ Make your Google Sheet PUBLIC:
-   • File → Share → Get link → Anyone with the link
-
-2️⃣ OR publish your sheet:
-   • File → Share → Publish to web → Entire Document → CSV
-
-3️⃣ Add headers to row 1:
-   id | title | description | completed | createdAt | updatedAt | dueDate | parentId`);
-      console.error('Error syncing from Google Sheets:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleShowSetupGuide = () => {
-    const guide = `
-✅ GOOGLE SHEETS INTEGRATION ACTIVE!
-
-Your Google Apps Script URL is configured and ready.
-
-🔥 WHAT'S WORKING NOW:
-• ✅ Automatic writing to Google Sheets
-• ✅ Real-time sync on every task change
-• ✅ Bidirectional sync (read from sheets)
-
-📋 ENSURE YOUR GOOGLE SHEET HAS THESE HEADERS IN ROW 1:
-id | title | description | completed | createdAt | updatedAt | dueDate | parentId
-
-🔗 Your Google Sheet:
-https://docs.google.com/spreadsheets/d/1eUBMFjVeYZLNXVDusTlMxwqNzra-FCZVdIME3daG2Jk/edit
-
-💡 USAGE:
-• Add/edit tasks → Automatically writes to Google Sheets
-• Use "🔄 Sync from Sheets" to pull updates from Google Sheets
-• Use "🔗 Open Sheet" to view your Google Sheet
-
-🚀 READY FOR AZURE STATIC WEB APPS DEPLOYMENT!
-    `;
-    alert(guide);
   };
 
   // Get date range for display
@@ -617,17 +548,8 @@ https://docs.google.com/spreadsheets/d/1eUBMFjVeYZLNXVDusTlMxwqNzra-FCZVdIME3daG
               </button>
               
               <div className="form-actions">
-                <button onClick={handleExportTasks} className="btn-export" title="Export CSV and copy to clipboard">
-                  📊 Copy to Sheets
-                </button>
-                <button onClick={() => openGoogleSheetForUpdate()} className="btn-open-sheet" title="Open your Google Sheet in new tab">
-                  🔗 Open Sheet
-                </button>
-                <button onClick={handleSyncFromSheets} className="btn-sync" title="Load latest data from Google Sheets">
-                  🔄 Sync from Sheets
-                </button>
-                <button onClick={handleShowSetupGuide} className="btn-setup" title="Show Google Sheets setup guide">
-                  ⚙️ Setup Guide
+                <button onClick={handleExportTasks} className="btn-export" title="Export tasks to CSV">
+                  💾 Export
                 </button>
                 <label className="btn-import">
                   📂 Import
