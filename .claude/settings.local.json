@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd /mnt/c/Dev/Learning/Planner/planner)",
+      "Bash(npm install date-fns uuid)",
+      "Bash(cd /mnt/c/Dev/Learning/Planner/planner/src)",
+      "Bash(mkdir -p utils components hooks)",
+      "Bash(npm start)",
+      "Bash(npm run build)",
+      "Bash(node -e \"try { require(''./src/utils/taskUtils.js''); console.log(''taskUtils: OK''); } catch(e) { console.error(''taskUtils error:'', e.message); }\")",
+      "Bash(node test.js)",
+      "Bash(rm test.js)",
+      "Bash(timeout 15s npm start)",
+      "Bash(rm -rf components hooks utils styles)",
+      "Bash(timeout 10s npm start)",
+      "Bash(timeout 30s npm run build)"
+    ],
+    "deny": []
+  }
+}
