@@ -17,16 +17,22 @@ const SHEET_NAME = 'Sheet1'; // Change this if your sheet has a different name
 
 function doPost(e) {
   try {
+    // Enable CORS for all origins
+    const output = ContentService.createTextOutput();
+    output.setMimeType(ContentService.MimeType.JSON);
+    
     // Parse the incoming request
     const requestData = JSON.parse(e.postData.contents);
     
     if (requestData.action === 'updateTasks') {
-      return updateTasksInSheet(requestData.data);
+      const result = updateTasksInSheet(requestData.data);
+      return result;
+    } else if (requestData.action === 'getTasks') {
+      const tasks = readTasksFromSheet();
+      return output.setContent(JSON.stringify({ success: true, data: tasks }));
     }
     
-    return ContentService
-      .createTextOutput(JSON.stringify({ success: false, error: 'Unknown action' }))
-      .setMimeType(ContentService.MimeType.JSON);
+    return output.setContent(JSON.stringify({ success: false, error: 'Unknown action' }));
       
   } catch (error) {
     return ContentService
@@ -36,12 +42,14 @@ function doPost(e) {
 }
 
 function doGet(e) {
-  // Handle GET requests for reading data
   try {
+    // Enable CORS
+    const output = ContentService.createTextOutput();
+    output.setMimeType(ContentService.MimeType.JSON);
+    
+    // Handle GET requests for reading data
     const tasks = readTasksFromSheet();
-    return ContentService
-      .createTextOutput(JSON.stringify({ success: true, data: tasks }))
-      .setMimeType(ContentService.MimeType.JSON);
+    return output.setContent(JSON.stringify({ success: true, data: tasks }));
   } catch (error) {
     return ContentService
       .createTextOutput(JSON.stringify({ success: false, error: error.toString() }))

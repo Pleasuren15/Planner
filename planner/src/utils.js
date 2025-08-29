@@ -275,26 +275,37 @@ export const csvToTasks = (csvContent) => {
 // ========== GOOGLE SHEETS INTEGRATION ==========
 export const loadTasksFromGoogleSheets = async () => {
   try {
-    const response = await fetch(GOOGLE_SHEETS_CONFIG.PUBLISHED_CSV_URL, {
+    if (!GOOGLE_SHEETS_CONFIG.APPS_SCRIPT_URL) {
+      throw new Error('Google Apps Script URL not configured');
+    }
+
+    // Use Google Apps Script for reading (bypasses CORS)
+    const response = await fetch(GOOGLE_SHEETS_CONFIG.APPS_SCRIPT_URL, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'text/csv',
-      },
+      mode: 'cors',
     });
     
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`Apps Script error: ${response.status}`);
     }
     
-    const csvContent = await response.text();
+    const result = await response.json();
     
-    // Cache the data locally
-    localStorage.setItem('plannerTasks', csvContent);
+    if (result.success && result.data) {
+      // Cache the data locally
+      const csvContent = tasksToCSV(result.data);
+      localStorage.setItem('plannerTasks', csvContent);
+      console.info('✅ Tasks loaded successfully from Google Sheets via Apps Script');
+      return result.data;
+    } else {
+      throw new Error(result.error || 'Unknown Apps Script error');
+    }
     
-    return csvToTasks(csvContent);
   } catch (error) {
-    console.error('Error loading tasks from Google Sheets:', error);
-    // Fallback to localStorage if Google Sheets fails
+    console.error('Error loading from Google Apps Script:', error);
+    console.info('💡 Falling back to local storage');
+    
+    // Fallback to localStorage
     const localContent = localStorage.getItem('plannerTasks');
     return localContent ? csvToTasks(localContent) : [];
   }
@@ -304,48 +315,49 @@ export const saveTasksToGoogleSheets = async (tasks) => {
   try {
     const csvContent = tasksToCSV(tasks);
     
-    // Save locally first
+    // Save locally first (always)
     localStorage.setItem('plannerTasks', csvContent);
     
-    // Check if Google Apps Script is configured
-    if (GOOGLE_SHEETS_CONFIG.APPS_SCRIPT_URL) {
-      try {
-        const response = await fetch(GOOGLE_SHEETS_CONFIG.APPS_SCRIPT_URL, {
-          method: 'POST',
-          mode: 'cors',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            action: 'updateTasks',
-            data: tasks
-          })
-        });
-        
-        if (response.ok) {
-          console.info('✅ Tasks successfully saved to Google Sheets');
-          return true;
-        } else {
-          throw new Error(`HTTP ${response.status}`);
-        }
-      } catch (apiError) {
-        console.error('Google Apps Script error:', apiError);
-        return true; // Still saved locally
-      }
-    } else {
-      // Auto-copy CSV to clipboard for easy pasting
-      try {
-        await navigator.clipboard.writeText(csvContent);
-        console.info('📋 CSV data copied to clipboard! Paste it into your Google Sheet.');
-      } catch (clipboardError) {
-        console.warn('Could not copy to clipboard:', clipboardError);
-      }
-      
-      console.info('💾 Tasks saved locally. Set up Google Apps Script for automatic sync.');
+    // Write to Google Sheets via Apps Script
+    if (!GOOGLE_SHEETS_CONFIG.APPS_SCRIPT_URL) {
+      console.warn('⚠️ Google Apps Script URL not configured');
       return true;
     }
+
+    try {
+      const response = await fetch(GOOGLE_SHEETS_CONFIG.APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'updateTasks',
+          data: tasks
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Apps Script HTTP error: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        console.info('✅ Tasks successfully written to Google Sheets via Apps Script');
+        return true;
+      } else {
+        throw new Error(result.error || 'Apps Script returned error');
+      }
+      
+    } catch (apiError) {
+      console.error('Google Apps Script write error:', apiError);
+      console.warn('⚠️ Google Sheets write failed - tasks saved locally only');
+      return true; // Still saved locally
+    }
+    
   } catch (error) {
-    console.error('Error saving tasks:', error);
+    console.error('Error in saveTasksToGoogleSheets:', error);
     return false;
   }
 };

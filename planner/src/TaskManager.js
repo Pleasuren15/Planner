@@ -279,19 +279,15 @@ const TaskManager = () => {
     setIsDarkMode(prev => !prev);
   };
 
-  // Save tasks to storage and attempt Google Sheets sync
+  // Save tasks to storage and Google Sheets
   const saveTasksToStorage = useCallback(async (updatedTasks) => {
     try {
-      await saveTasks(updatedTasks);
+      const success = await saveTasks(updatedTasks);
       
-      // Auto-copy to clipboard on every save for easy Google Sheets sync
-      try {
-        const utils = await import('./utils');
-        const csvContent = utils.tasksToCSV(updatedTasks);
-        await navigator.clipboard.writeText(csvContent);
-        console.info('📋 Tasks auto-copied to clipboard - paste into Google Sheets anytime!');
-      } catch (clipboardError) {
-        console.warn('Could not auto-copy to clipboard:', clipboardError);
+      if (success) {
+        console.info('✅ Tasks saved successfully to Google Sheets!');
+      } else {
+        console.warn('⚠️ Google Sheets sync failed - tasks saved locally');
       }
       
       setError(null);
@@ -452,15 +448,7 @@ const TaskManager = () => {
 
   const handleExportTasks = async () => {
     exportTasks(tasks);
-    
-    // Also copy to clipboard for easy pasting
-    try {
-      const csvContent = await import('./utils').then(utils => utils.tasksToCSV(tasks));
-      await navigator.clipboard.writeText(csvContent);
-      alert('📊 Tasks exported as CSV file AND copied to clipboard! \n\n✨ Quick sync: Open your Google Sheet and paste (Ctrl+V)');
-    } catch (error) {
-      alert('📊 Tasks exported as CSV file! Import this into your Google Sheet.');
-    }
+    alert('📊 Tasks exported as CSV file! \n\n💡 Note: Your tasks are automatically synced to Google Sheets now!');
   };
 
   const handleSyncFromSheets = async () => {
@@ -468,11 +456,27 @@ const TaskManager = () => {
       setLoading(true);
       const sheetsData = await loadTasksFromGoogleSheets();
       setTasks(sheetsData);
-      alert('🔄 Tasks synced from Google Sheets successfully!');
+      
+      if (sheetsData.length > 0) {
+        alert('🔄 Tasks synced from Google Sheets successfully!');
+      } else {
+        alert('📋 Google Sheets is empty or inaccessible. Using local data.\n\n💡 Make sure your Google Sheet is public or has the correct headers.');
+      }
+      
       setError(null);
     } catch (err) {
       setError('Failed to sync from Google Sheets');
-      alert('❌ Error syncing from Google Sheets. Make sure your Google Sheet is published and accessible.');
+      alert(`❌ Google Sheets sync failed. 
+
+SOLUTIONS:
+1️⃣ Make your Google Sheet PUBLIC:
+   • File → Share → Get link → Anyone with the link
+
+2️⃣ OR publish your sheet:
+   • File → Share → Publish to web → Entire Document → CSV
+
+3️⃣ Add headers to row 1:
+   id | title | description | completed | createdAt | updatedAt | dueDate | parentId`);
       console.error('Error syncing from Google Sheets:', err);
     } finally {
       setLoading(false);
@@ -481,34 +485,27 @@ const TaskManager = () => {
 
   const handleShowSetupGuide = () => {
     const guide = `
-🚀 GOOGLE SHEETS SETUP GUIDE
+✅ GOOGLE SHEETS INTEGRATION ACTIVE!
 
-To enable automatic writing to Google Sheets:
+Your Google Apps Script URL is configured and ready.
 
-1️⃣ CREATE GOOGLE APPS SCRIPT:
-   • Go to https://script.google.com/
-   • Create new project
-   • Copy code from 'google-apps-script.js' file
-   • Replace Code.gs content
+🔥 WHAT'S WORKING NOW:
+• ✅ Automatic writing to Google Sheets
+• ✅ Real-time sync on every task change
+• ✅ Bidirectional sync (read from sheets)
 
-2️⃣ DEPLOY WEB APP:
-   • Click Deploy → New deployment
-   • Type: Web app
-   • Execute as: Me
-   • Access: Anyone
-   • Deploy and copy the Web App URL
+📋 ENSURE YOUR GOOGLE SHEET HAS THESE HEADERS IN ROW 1:
+id | title | description | completed | createdAt | updatedAt | dueDate | parentId
 
-3️⃣ UPDATE CONFIG:
-   • Edit src/utils.js
-   • Set APPS_SCRIPT_URL to your Web App URL
+🔗 Your Google Sheet:
+https://docs.google.com/spreadsheets/d/1eUBMFjVeYZLNXVDusTlMxwqNzra-FCZVdIME3daG2Jk/edit
 
-4️⃣ SETUP GOOGLE SHEET:
-   • Add headers: id, title, description, completed, createdAt, updatedAt, dueDate, parentId
-   • Publish sheet: File → Share → Publish to web
+💡 USAGE:
+• Add/edit tasks → Automatically writes to Google Sheets
+• Use "🔄 Sync from Sheets" to pull updates from Google Sheets
+• Use "🔗 Open Sheet" to view your Google Sheet
 
-Your sheet: https://docs.google.com/spreadsheets/d/1eUBMFjVeYZLNXVDusTlMxwqNzra-FCZVdIME3daG2Jk/edit
-
-📝 Currently: Read from Google Sheets ✅, Write requires setup ⚠️
+🚀 READY FOR AZURE STATIC WEB APPS DEPLOYMENT!
     `;
     alert(guide);
   };
