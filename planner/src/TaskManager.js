@@ -1,12 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
-  getCurrentWeekRange,
-  getCurrentMonthRange,
-  getCurrentYearRange,
-  filterTasksByDateRange,
-  formatDateRange,
-  navigateDate,
-  isCurrentPeriod,
   createTask,
   updateTask,
   toggleTaskCompletion,
@@ -14,7 +7,15 @@ import {
   loadTasks,
   saveTasks,
   exportTasks,
-  importTasksFromFile
+  importTasksFromFile,
+  configureBlobStorage,
+  getCurrentWeekRange,
+  getCurrentMonthRange,
+  getCurrentYearRange,
+  filterTasksByDateRange,
+  formatDateRange,
+  navigateDate,
+  isCurrentPeriod
 } from './utils';
 import './TaskManager.css';
 
@@ -162,6 +163,12 @@ const TaskItem = ({ task, onToggle, onEdit, onDelete, onAddSubtask, onEditSubtas
                 <span className="task-date">
                   🗓️ {new Date(task.createdAt).toLocaleDateString()}
                 </span>
+                <span className="task-category">
+                  {task.category === 'work' ? '💼' : '👤'} {task.category || 'personal'}
+                </span>
+                <span className={`task-priority priority-${task.priority || 'medium'}`}>
+                  {task.priority === 'high' ? '🔴' : task.priority === 'low' ? '🟢' : '🟡'} {task.priority || 'medium'}
+                </span>
                 {task.subtasks && task.subtasks.length > 0 && (
                   <span className="subtask-count">
                     📝 {task.subtasks.filter(st => st.completed).length}/{task.subtasks.length} subtasks
@@ -238,16 +245,20 @@ const TaskManager = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [viewType, setViewType] = useState('week');
   const [showAddTask, setShowAddTask] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [newTaskDescription, setNewTaskDescription] = useState('');
   const [newTaskDueDate, setNewTaskDueDate] = useState('');
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    const saved = localStorage.getItem('taskPlannerTheme');
-    return saved ? saved === 'dark' : true; // default to dark
-  });
+  const [newTaskCategory, setNewTaskCategory] = useState('personal'); // 'personal' or 'work'
+  const [newTaskPriority, setNewTaskPriority] = useState('medium'); // 'low', 'medium', 'high'
+  const [showBlobConfig, setShowBlobConfig] = useState(false);
+  const [blobConnectionString, setBlobConnectionString] = useState('');
+  const [blobContainerName, setBlobContainerName] = useState('tasks');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all'); // 'all', 'completed', 'pending'
+  const [showChart, setShowChart] = useState(false);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [viewType, setViewType] = useState('all'); // 'all', 'week', 'month', 'year'
 
   // Load tasks on component mount
   useEffect(() => {
@@ -267,16 +278,6 @@ const TaskManager = () => {
     initializeTasks();
   }, []);
 
-  // Theme management
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
-    localStorage.setItem('taskPlannerTheme', isDarkMode ? 'dark' : 'light');
-  }, [isDarkMode]);
-
-  const toggleTheme = () => {
-    setIsDarkMode(prev => !prev);
-  };
-
   // Save tasks to storage
   const saveTasksToStorage = useCallback(async (updatedTasks) => {
     try {
@@ -288,33 +289,75 @@ const TaskManager = () => {
     }
   }, []);
 
-  // Get filtered tasks based on current date and view type
+  // Get filtered and searched tasks
   const filteredTasks = useMemo(() => {
-    let range;
-    switch (viewType) {
-      case 'week':
-        range = getCurrentWeekRange(currentDate);
-        break;
-      case 'month':
-        range = getCurrentMonthRange(currentDate);
-        break;
-      case 'year':
-        range = getCurrentYearRange(currentDate);
-        break;
-      default:
-        range = getCurrentWeekRange(currentDate);
+    let filtered = [...tasks];
+
+    // Apply date range filter
+    if (viewType !== 'all') {
+      let range;
+      switch (viewType) {
+        case 'week':
+          range = getCurrentWeekRange(currentDate);
+          break;
+        case 'month':
+          range = getCurrentMonthRange(currentDate);
+          break;
+        case 'year':
+          range = getCurrentYearRange(currentDate);
+          break;
+        default:
+          range = null;
+      }
+      if (range) {
+        filtered = filterTasksByDateRange(filtered, range);
+      }
     }
-    return filterTasksByDateRange(tasks, range);
-  }, [tasks, currentDate, viewType]);
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      const searchInTasks = (taskList) => {
+        return taskList.filter(task => {
+          const matchesTitle = task.title.toLowerCase().includes(query);
+          const matchesDescription = task.description && task.description.toLowerCase().includes(query);
+          const hasMatchingSubtasks = task.subtasks && searchInTasks(task.subtasks).length > 0;
+          
+          return matchesTitle || matchesDescription || hasMatchingSubtasks;
+        }).map(task => ({
+          ...task,
+          subtasks: task.subtasks ? searchInTasks(task.subtasks) : []
+        }));
+      };
+      filtered = searchInTasks(filtered);
+    }
+
+    // Apply status filter
+    if (filterStatus !== 'all') {
+      const filterByStatus = (taskList) => {
+        return taskList.filter(task => {
+          const isCompleted = task.completed;
+          const matchesFilter = filterStatus === 'completed' ? isCompleted : !isCompleted;
+          return matchesFilter;
+        }).map(task => ({
+          ...task,
+          subtasks: task.subtasks ? filterByStatus(task.subtasks) : []
+        }));
+      };
+      filtered = filterByStatus(filtered);
+    }
+
+    return filtered;
+  }, [tasks, searchQuery, filterStatus, viewType, currentDate]);
 
   // Get task statistics
   const taskStats = useMemo(() => getTaskStats(filteredTasks), [filteredTasks]);
 
-  const isCurrentView = isCurrentPeriod(currentDate, viewType);
+  const isCurrentView = viewType === 'all' || isCurrentPeriod(currentDate, viewType);
 
   // Task CRUD operations
-  const addTask = useCallback((title, description = '', dueDate = null) => {
-    const newTask = createTask(title, description, dueDate);
+  const addTask = useCallback((title, description = '', dueDate = null, category = 'personal', priority = 'medium') => {
+    const newTask = createTask(title, description, dueDate, null, category, priority);
     const updatedTasks = [...tasks, newTask];
     setTasks(updatedTasks);
     saveTasksToStorage(updatedTasks);
@@ -367,7 +410,7 @@ const TaskManager = () => {
   const addSubtask = useCallback((parentTaskId, subtaskTitle) => {
     const updatedTasks = tasks.map(task => {
       if (task.id === parentTaskId) {
-        const subtask = createTask(subtaskTitle, '', null, parentTaskId);
+        const subtask = createTask(subtaskTitle, '', null, parentTaskId, task.category, task.priority);
         return updateTask(task, { subtasks: [...task.subtasks, subtask] });
       }
       return task;
@@ -418,10 +461,12 @@ const TaskManager = () => {
   const handleAddTask = (e) => {
     e.preventDefault();
     if (newTaskTitle.trim()) {
-      addTask(newTaskTitle.trim(), newTaskDescription.trim(), newTaskDueDate || null);
+      addTask(newTaskTitle.trim(), newTaskDescription.trim(), newTaskDueDate || null, newTaskCategory, newTaskPriority);
       setNewTaskTitle('');
       setNewTaskDescription('');
       setNewTaskDueDate('');
+      setNewTaskCategory('personal');
+      setNewTaskPriority('medium');
       setShowAddTask(false);
     }
   };
@@ -441,21 +486,18 @@ const TaskManager = () => {
     exportTasks(tasks);
   };
 
-  // Get date range for display
-  const getDateRange = () => {
-    switch (viewType) {
-      case 'week':
-        return getCurrentWeekRange(currentDate);
-      case 'month':
-        return getCurrentMonthRange(currentDate);
-      case 'year':
-        return getCurrentYearRange(currentDate);
-      default:
-        return getCurrentWeekRange(currentDate);
+  const handleConfigureBlob = async () => {
+    try {
+      configureBlobStorage(blobConnectionString, blobContainerName);
+      setShowBlobConfig(false);
+      alert('✅ Blob storage configured! Auto-sync enabled - tasks will automatically sync to Azure Blob Storage.');
+      // Save current tasks to blob immediately
+      await saveTasks(tasks);
+    } catch (error) {
+      console.error('Error configuring blob storage:', error);
+      alert('❌ Error configuring blob storage. Please check your connection string.');
     }
   };
-
-  const range = getDateRange();
 
   if (error) {
     return (
@@ -481,147 +523,347 @@ const TaskManager = () => {
             <p className="app-description">Organize your life, one task at a time</p>
           </div>
           
-          <button onClick={toggleTheme} className="theme-toggle" title={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}>
-            {isDarkMode ? '☀️' : '🌙'}
-          </button>
+          <div className="header-controls">
+            <button onClick={() => setShowChart(!showChart)} className="chart-toggle" title="View Statistics">
+              📊
+            </button>
+            <button onClick={() => setShowBlobConfig(!showBlobConfig)} className="settings-toggle" title="Blob Storage Settings">
+              ⚙️
+            </button>
+          </div>
         </div>
         
-        {/* Period Indicator in Header */}
+        {/* Status Indicator in Header */}
         <div className="period-indicator">
-          {isCurrentView ? (
-            <span className="current-indicator">⚡ Current {viewType}</span>
+          {viewType === 'all' ? (
+            <span className="current-indicator">📋 All Tasks</span>
           ) : (
-            <span className="history-indicator">📜 History - {viewType}</span>
+            <span className={isCurrentView ? "current-indicator" : "history-indicator"}>
+              {isCurrentView ? '⚡' : '📜'} {formatDateRange(
+                viewType === 'week' ? getCurrentWeekRange(currentDate) :
+                viewType === 'month' ? getCurrentMonthRange(currentDate) :
+                getCurrentYearRange(currentDate), viewType
+              )}
+            </span>
+          )}
+          {searchQuery && (
+            <span className="search-indicator">🔍 "{searchQuery}"</span>
+          )}
+          {filterStatus !== 'all' && (
+            <span className="filter-indicator">
+              {filterStatus === 'completed' ? '✅ Completed' : '⏳ Pending'}
+            </span>
           )}
         </div>
       </header>
 
-      {/* Top Controls Row */}
-      <div className="top-controls">
-        {/* Date Navigator */}
-        <div className="date-navigator">
-          <div className="view-type-selector">
-            <button className={`view-btn ${viewType === 'week' ? 'active' : ''}`} onClick={() => setViewType('week')}>
-              📅 Week
-            </button>
-            <button className={`view-btn ${viewType === 'month' ? 'active' : ''}`} onClick={() => setViewType('month')}>
-              🗓️ Month
-            </button>
-            <button className={`view-btn ${viewType === 'year' ? 'active' : ''}`} onClick={() => setViewType('year')}>
-              📆 Year
-            </button>
-          </div>
-
-          <div className="date-controls">
-            <button onClick={() => handleNavigate('prev')} className="nav-btn" title={`Previous ${viewType}`}>
-              ⬅️
-            </button>
-            
-            <div className="date-display">
-              <span className="date-range">{formatDateRange(range, viewType)}</span>
+      {/* Blob Storage Settings Modal */}
+      {showBlobConfig && (
+        <div className="modal-overlay" onClick={() => setShowBlobConfig(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>⚙️ Azure Blob Storage Settings</h3>
+              <button 
+                className="modal-close" 
+                onClick={() => setShowBlobConfig(false)}
+                title="Close"
+              >
+                ✕
+              </button>
             </div>
             
-            <button onClick={() => handleNavigate('next')} className="nav-btn" title={`Next ${viewType}`}>
-              ➡️
-            </button>
+            <div className="modal-body">
+              <div className="config-inputs">
+                <div className="input-group">
+                  <label htmlFor="connectionString">Connection String</label>
+                  <textarea
+                    id="connectionString"
+                    value={blobConnectionString}
+                    onChange={(e) => setBlobConnectionString(e.target.value)}
+                    placeholder="DefaultEndpointsProtocol=https;AccountName=myaccount;AccountKey=mykey;EndpointSuffix=core.windows.net"
+                    className="form-input connection-string-input"
+                    rows="3"
+                  />
+                </div>
+                
+                <div className="input-group">
+                  <label htmlFor="containerName">Container Name</label>
+                  <input
+                    id="containerName"
+                    type="text"
+                    value={blobContainerName}
+                    onChange={(e) => setBlobContainerName(e.target.value)}
+                    placeholder="tasks"
+                    className="form-input"
+                  />
+                </div>
+              </div>
+              
+              <div className="config-help">
+                <div className="help-section">
+                  <h4>📋 Setup Instructions</h4>
+                  <ol>
+                    <li>Go to Azure Portal → Storage Account</li>
+                    <li>Navigate to "Access keys" section</li>
+                    <li>Copy the connection string</li>
+                    <li>Create a container (default: 'tasks')</li>
+                    <li>Paste connection string above</li>
+                  </ol>
+                </div>
+                
+                <div className="help-section">
+                  <h4>🔄 Auto-Sync</h4>
+                  <p>Once configured, all task changes will automatically sync to Azure Blob Storage in the background.</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="modal-footer">
+              <button 
+                onClick={handleConfigureBlob} 
+                className="btn-save-config" 
+                disabled={!blobConnectionString}
+              >
+                💾 Save & Enable Auto-Sync
+              </button>
+              <button 
+                onClick={() => setShowBlobConfig(false)} 
+                className="btn-cancel"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
-
-          {!isCurrentView && (
-            <button onClick={goToToday} className="today-btn" title="Go to current period">
-              🏠 Today
-            </button>
-          )}
         </div>
+      )}
 
-        {/* Task Statistics Chart */}
-        <TaskChart stats={taskStats} viewType={viewType} />
-      </div>
+      {/* Task Statistics Chart Modal */}
+      {showChart && (
+        <div className="modal-overlay" onClick={() => setShowChart(false)}>
+          <div className="modal-content chart-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>📊 Task Statistics</h3>
+              <button 
+                className="modal-close" 
+                onClick={() => setShowChart(false)}
+                title="Close"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="modal-body chart-modal-body">
+              <TaskChart stats={taskStats} viewType="all" />
+              
+              <div className="chart-details">
+                <div className="stats-grid">
+                  <div className="stat-card">
+                    <div className="stat-icon">📋</div>
+                    <div className="stat-info">
+                      <div className="stat-number">{taskStats.total}</div>
+                      <div className="stat-label">Total Tasks</div>
+                    </div>
+                  </div>
+                  
+                  <div className="stat-card">
+                    <div className="stat-icon">✅</div>
+                    <div className="stat-info">
+                      <div className="stat-number">{taskStats.completed}</div>
+                      <div className="stat-label">Completed</div>
+                    </div>
+                  </div>
+                  
+                  <div className="stat-card">
+                    <div className="stat-icon">⏳</div>
+                    <div className="stat-info">
+                      <div className="stat-number">{taskStats.pending}</div>
+                      <div className="stat-label">Pending</div>
+                    </div>
+                  </div>
+                  
+                  <div className="stat-card">
+                    <div className="stat-icon">🎯</div>
+                    <div className="stat-info">
+                      <div className="stat-number">{taskStats.completionRate}%</div>
+                      <div className="stat-label">Completion Rate</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Task Management Section */}
       <div className="content-area">
-        {/* Task Form - Only show in current view */}
-        {isCurrentView && (
-          <div className="task-form">
-            <div className="form-header">
-              <button onClick={() => setShowAddTask(!showAddTask)} className="btn-add-task">
-                {showAddTask ? '❌ Cancel' : '➕ Add New Task'}
-              </button>
-              
-              <div className="form-actions">
-                <button onClick={handleExportTasks} className="btn-export" title="Export tasks to CSV">
-                  💾 Export
+        {/* Task List */}
+        <main className="main-content">
+          {/* Task Form - At the top of main content */}
+          {isCurrentView && (
+            <div className="task-form">
+              <div className="form-header">
+                <button onClick={() => setShowAddTask(!showAddTask)} className="btn-add-task">
+                  {showAddTask ? '❌ Cancel' : '➕ Add New Task'}
                 </button>
-                <label className="btn-import">
-                  📂 Import
-                  <input
-                    type="file"
-                    accept=".csv"
-                    onChange={(e) => {
-                      const file = e.target.files[0];
-                      if (file && file.type === 'text/csv') {
-                        handleImportTasks(file);
-                      }
-                      e.target.value = '';
-                    }}
-                    style={{ display: 'none' }}
-                  />
-                </label>
-              </div>
-            </div>
-
-            {showAddTask && (
-              <form onSubmit={handleAddTask} className="add-task-form">
-                <input
-                  type="text"
-                  value={newTaskTitle}
-                  onChange={(e) => setNewTaskTitle(e.target.value)}
-                  placeholder="📝 Enter task title..."
-                  className="form-input title-input"
-                  required
-                  autoFocus
-                />
-                <textarea
-                  value={newTaskDescription}
-                  onChange={(e) => setNewTaskDescription(e.target.value)}
-                  placeholder="📄 Enter task description (optional)..."
-                  className="form-input description-input"
-                  rows="3"
-                />
-                <div className="form-row">
-                  <label className="form-label">
-                    📅 Due Date (optional):
+                
+                <div className="form-actions">
+                  <button onClick={handleExportTasks} className="btn-export" title="Export tasks to CSV">
+                    💾 Export
+                  </button>
+                  <label className="btn-import">
+                    📂 Import
                     <input
-                      type="date"
-                      value={newTaskDueDate}
-                      onChange={(e) => setNewTaskDueDate(e.target.value)}
-                      className="form-input date-input"
+                      type="file"
+                      accept=".csv"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file && file.type === 'text/csv') {
+                          handleImportTasks(file);
+                        }
+                        e.target.value = '';
+                      }}
+                      style={{ display: 'none' }}
                     />
                   </label>
                 </div>
-                <div className="form-buttons">
-                  <button type="submit" className="btn-submit" disabled={!newTaskTitle.trim()}>
-                    ➕ Add Task
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowAddTask(false);
-                      setNewTaskTitle('');
-                      setNewTaskDescription('');
-                      setNewTaskDueDate('');
-                    }}
-                    className="btn-cancel"
-                  >
-                    ❌ Cancel
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        )}
+              </div>
 
-        {/* Task List */}
-        <main className="main-content">
+              {showAddTask && (
+                <form onSubmit={handleAddTask} className="add-task-form">
+                  <input
+                    type="text"
+                    value={newTaskTitle}
+                    onChange={(e) => setNewTaskTitle(e.target.value)}
+                    placeholder="📝 Enter task title..."
+                    className="form-input title-input"
+                    required
+                    autoFocus
+                  />
+                  <textarea
+                    value={newTaskDescription}
+                    onChange={(e) => setNewTaskDescription(e.target.value)}
+                    placeholder="📄 Enter task description (optional)..."
+                    className="form-input description-input"
+                    rows="3"
+                  />
+                  <div className="form-row">
+                    <label className="form-label">
+                      📅 Due Date (optional):
+                      <input
+                        type="date"
+                        value={newTaskDueDate}
+                        onChange={(e) => setNewTaskDueDate(e.target.value)}
+                        className="form-input date-input"
+                      />
+                    </label>
+                  </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label className="form-label">
+                        📂 Category:
+                        <select
+                          value={newTaskCategory}
+                          onChange={(e) => setNewTaskCategory(e.target.value)}
+                          className="form-input category-select"
+                        >
+                          <option value="personal">👤 Personal</option>
+                          <option value="work">💼 Work</option>
+                        </select>
+                      </label>
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">
+                        ⚡ Priority:
+                        <select
+                          value={newTaskPriority}
+                          onChange={(e) => setNewTaskPriority(e.target.value)}
+                          className="form-input priority-select"
+                        >
+                          <option value="low">🟢 Low</option>
+                          <option value="medium">🟡 Medium</option>
+                          <option value="high">🔴 High</option>
+                        </select>
+                      </label>
+                    </div>
+                  </div>
+                  <div className="form-buttons">
+                    <button type="submit" className="btn-submit" disabled={!newTaskTitle.trim()}>
+                      ➕ Add Task
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowAddTask(false);
+                        setNewTaskTitle('');
+                        setNewTaskDescription('');
+                        setNewTaskDueDate('');
+                        setNewTaskCategory('personal');
+                        setNewTaskPriority('medium');
+                      }}
+                      className="btn-cancel"
+                    >
+                      ❌ Cancel
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          )}
+          {/* Search Input */}
+          <div className="search-section">
+            <div className="search-box">
+              <input
+                type="text"
+                placeholder="🔍 Search tasks..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="search-input"
+              />
+            </div>
+          </div>
+
+          {/* Date Navigation - Only show when not viewing all tasks */}
+          {viewType !== 'all' && (
+            <div className="date-navigation">
+              <button 
+                onClick={() => handleNavigate('prev')} 
+                className="nav-btn" 
+                title={`Previous ${viewType}`}
+              >
+                ⬅️
+              </button>
+              
+              <div className="date-display">
+                <span className="date-range">
+                  {formatDateRange(
+                    viewType === 'week' ? getCurrentWeekRange(currentDate) :
+                    viewType === 'month' ? getCurrentMonthRange(currentDate) :
+                    getCurrentYearRange(currentDate), viewType
+                  )}
+                </span>
+              </div>
+              
+              <button 
+                onClick={() => handleNavigate('next')} 
+                className="nav-btn" 
+                title={`Next ${viewType}`}
+              >
+                ➡️
+              </button>
+              
+              {!isCurrentView && (
+                <button 
+                  onClick={goToToday} 
+                  className="today-btn" 
+                  title="Go to current period"
+                >
+                  🏠 Today
+                </button>
+              )}
+            </div>
+          )}
+
           {loading ? (
             <div className="task-list-loading">
               <div className="loading-spinner"></div>
@@ -632,9 +874,9 @@ const TaskManager = () => {
               <div className="empty-state">
                 <span className="empty-icon">📋</span>
                 <p className="empty-message">
-                  {isCurrentView 
-                    ? `No tasks for this ${viewType}. Add some tasks to get started!` 
-                    : `No tasks found for this ${viewType}.`
+                  {(searchQuery || filterStatus !== 'all')
+                    ? 'No tasks match your search or filter criteria.'
+                    : 'No tasks yet. Add some tasks to get started!'
                   }
                 </p>
               </div>
@@ -642,9 +884,43 @@ const TaskManager = () => {
           ) : (
             <div className="task-list">
               <div className="task-summary-bar">
-                <span className="summary-item">📊 Total: {tasks.length}</span>
-                <span className="summary-item">🔍 Filtered: {filteredTasks.length}</span>
-                <span className="summary-item">✅ Completed: {filteredTasks.filter(t => t.completed).length}</span>
+                <div className="summary-stats">
+                  <span className="summary-item">📊 Total: {tasks.length}</span>
+                  <span className="summary-item">🔍 Showing: {filteredTasks.length}</span>
+                  <span className="summary-item">✅ Completed: {filteredTasks.filter(t => t.completed).length}</span>
+                </div>
+                
+                <div className="filter-buttons">
+                  <select 
+                    className="date-filter-dropdown"
+                    value={viewType}
+                    onChange={(e) => setViewType(e.target.value)}
+                  >
+                    <option value="all">📋 All Time</option>
+                    <option value="week">📅 This Week</option>
+                    <option value="month">🗓️ This Month</option>
+                    <option value="year">📆 This Year</option>
+                  </select>
+                  
+                  <button 
+                    className={`filter-btn ${filterStatus === 'all' ? 'active' : ''}`}
+                    onClick={() => setFilterStatus('all')}
+                  >
+                    📋 All
+                  </button>
+                  <button 
+                    className={`filter-btn ${filterStatus === 'pending' ? 'active' : ''}`}
+                    onClick={() => setFilterStatus('pending')}
+                  >
+                    ⏳ Pending
+                  </button>
+                  <button 
+                    className={`filter-btn ${filterStatus === 'completed' ? 'active' : ''}`}
+                    onClick={() => setFilterStatus('completed')}
+                  >
+                    ✅ Done
+                  </button>
+                </div>
               </div>
               {filteredTasks.map((task) => (
                 <TaskItem

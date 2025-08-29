@@ -1,0 +1,22 @@
+services:
+  # DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;
+  blob-storage:
+    image: mcr.microsoft.com/azure-storage/azurite:latest
+    container_name: 'azurite-blobstorage'
+    hostname: azurite
+    restart: always
+    command: 'azurite --blobHost 0.0.0.0 --queueHost 0.0.0.0 --tableHost 0.0.0.0 --loose --debug /workspace/debug.log'
+    ports:
+      - 10000:10000
+    volumes:
+      - ./azuriteData:/data
+      - ./workspace:/workspace
+    environment:
+      - AZURITE_BLOB_CORS=*
+      - AZURITE_QUEUE_CORS=*
+      - AZURITE_TABLE_CORS=*
+      - AZURITE_BLOB_CORS_ALLOWED_ORIGINS=http://localhost:3000
+      - AZURITE_BLOB_CORS_ALLOWED_METHODS=GET,PUT,POST,DELETE,OPTIONS
+      - AZURITE_BLOB_CORS_ALLOWED_HEADERS=*
+      - AZURITE_BLOB_CORS_EXPOSED_HEADERS=*
+      - AZURITE_BLOB_CORS_MAX_AGE=86400

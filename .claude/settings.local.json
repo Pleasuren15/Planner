@@ -18,7 +18,8 @@
       "WebFetch(domain:doc-08-18-sheets.googleusercontent.com)",
       "Bash(curl -s \"https://docs.google.com/spreadsheets/d/e/2PACX-1vQZ2gQPaJqqi4LNdcC9I94enwBMbXU33gFzlLxHabv95zvmEL66PxvyIlfvxGvX9G8xagTzg0JRTcdM/pub?output=csv\")",
       "Bash(rm /mnt/c/Dev/Learning/Planner/planner/src/config.js)",
-      "Bash(rm /mnt/c/Dev/Learning/Planner/planner/google-apps-script.js)"
+      "Bash(rm /mnt/c/Dev/Learning/Planner/planner/google-apps-script.js)",
+      "Bash(npm run build --silent)"
     ],
     "deny": []
   }

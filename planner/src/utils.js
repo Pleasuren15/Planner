@@ -110,7 +110,7 @@ export const createDateString = (date = new Date()) => {
 };
 
 // ========== TASK UTILITIES ==========
-export const createTask = (title, description = '', dueDate = null, parentId = null) => ({
+export const createTask = (title, description = '', dueDate = null, parentId = null, category = 'personal', priority = 'medium') => ({
   id: uuidv4(),
   title,
   description,
@@ -119,6 +119,8 @@ export const createTask = (title, description = '', dueDate = null, parentId = n
   updatedAt: createDateString(),
   dueDate,
   parentId,
+  category,
+  priority,
   subtasks: []
 });
 
@@ -206,7 +208,7 @@ export const arrayToCSVLine = (array) => {
 };
 
 export const tasksToCSV = (tasks) => {
-  const headers = ['id', 'title', 'description', 'completed', 'createdAt', 'updatedAt', 'dueDate', 'parentId'];
+  const headers = ['id', 'title', 'description', 'completed', 'createdAt', 'updatedAt', 'dueDate', 'parentId', 'category', 'priority'];
   const csvLines = [arrayToCSVLine(headers)];
   
   const flattenTasks = (taskList, parentId = null) => {
@@ -219,7 +221,9 @@ export const tasksToCSV = (tasks) => {
         task.createdAt,
         task.updatedAt,
         task.dueDate || '',
-        parentId || ''
+        parentId || '',
+        task.category || 'personal',
+        task.priority || 'medium'
       ]));
       
       if (task.subtasks && task.subtasks.length > 0) {
@@ -253,6 +257,8 @@ export const csvToTasks = (csvContent) => {
       updatedAt: values[5],
       dueDate: values[6] || null,
       parentId: values[7] || null,
+      category: values[8] || 'personal',
+      priority: values[9] || 'medium',
       subtasks: []
     };
     
@@ -271,10 +277,202 @@ export const csvToTasks = (csvContent) => {
   return rootTasks;
 };
 
+// ========== BLOB STORAGE UTILITIES ==========
+// Configuration for Azure Blob Storage
+let blobConfig = {
+  connectionString: '',
+  containerName: 'tasks',
+  accountName: '',
+  accountKey: '',
+  enabled: false
+};
+
+// Parse Azure Storage connection string
+const parseConnectionString = (connectionString) => {
+  const params = {};
+  connectionString.split(';').forEach(part => {
+    const [key, value] = part.split('=', 2);
+    if (key && value) {
+      params[key] = value;
+    }
+  });
+  
+  return {
+    accountName: params['AccountName'] || '',
+    accountKey: params['AccountKey'] || '',
+    endpointSuffix: params['EndpointSuffix'] || 'core.windows.net'
+  };
+};
+
+// Set blob storage configuration
+export const configureBlobStorage = (connectionString, containerName = 'tasks') => {
+  const parsed = parseConnectionString(connectionString);
+  
+  blobConfig = {
+    connectionString,
+    containerName,
+    accountName: parsed.accountName,
+    accountKey: parsed.accountKey,
+    endpointSuffix: parsed.endpointSuffix,
+    enabled: !!(parsed.accountName && parsed.accountKey)
+  };
+  
+  // Store config in localStorage for persistence
+  localStorage.setItem('blobConfig', JSON.stringify(blobConfig));
+};
+
+// Load blob configuration from localStorage
+export const loadBlobConfig = () => {
+  try {
+    const stored = localStorage.getItem('blobConfig');
+    if (stored) {
+      blobConfig = JSON.parse(stored);
+    }
+  } catch (error) {
+    console.error('Error loading blob config:', error);
+  }
+};
+
+// Generate HMAC-SHA256 signature using Web Crypto API
+const generateSignature = async (stringToSign, accountKey) => {
+  const keyBuffer = Uint8Array.from(atob(accountKey), c => c.charCodeAt(0));
+  const dataBuffer = new TextEncoder().encode(stringToSign);
+  
+  const key = await crypto.subtle.importKey(
+    'raw',
+    keyBuffer,
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  
+  const signature = await crypto.subtle.sign('HMAC', key, dataBuffer);
+  return btoa(String.fromCharCode(...new Uint8Array(signature)));
+};
+
+// Generate Azure Storage authorization header using Shared Key
+const generateAuthHeader = async (method, url, contentLength = 0, contentType = '') => {
+  const urlParts = new URL(url);
+  const canonicalizedResource = `/${blobConfig.accountName}${urlParts.pathname}`;
+  
+  const now = new Date().toUTCString();
+  const xMsDate = now;
+  const xMsVersion = '2020-10-02';
+  
+  const stringToSign = [
+    method,
+    '', // Content-Encoding
+    '', // Content-Language
+    contentLength || '', // Content-Length
+    '', // Content-MD5
+    contentType, // Content-Type
+    '', // Date
+    '', // If-Modified-Since
+    '', // If-Match
+    '', // If-None-Match
+    '', // If-Unmodified-Since
+    '', // Range
+    `x-ms-blob-type:BlockBlob`,
+    `x-ms-date:${xMsDate}`,
+    `x-ms-version:${xMsVersion}`,
+    canonicalizedResource
+  ].join('\n');
+
+  const signature = await generateSignature(stringToSign, blobConfig.accountKey);
+  
+  return {
+    'Authorization': `SharedKey ${blobConfig.accountName}:${signature}`,
+    'x-ms-date': xMsDate,
+    'x-ms-version': xMsVersion,
+    'x-ms-blob-type': 'BlockBlob'
+  };
+};
+
+// Save tasks to Azure Blob Storage
+export const saveTasksToBlob = async (tasks) => {
+  if (!blobConfig.enabled) {
+    throw new Error('Blob storage not configured');
+  }
+
+  try {
+    const csvContent = tasksToCSV(tasks);
+    const blobUrl = `http://localhost:10000/devstoreaccount1/tasks/tasks.csv`;
+    console.log('Saving tasks to blob URL:', blobUrl);
+    
+    const headers = await generateAuthHeader('PUT', blobUrl, csvContent.length, 'text/csv');
+    
+    const response = await fetch(blobUrl, {
+      method: 'PUT',
+      headers: {
+        ...headers,
+        'Content-Type': 'text/csv',
+        'Content-Length': csvContent.length.toString()
+      },
+      body: csvContent
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+    }
+
+    console.log('Tasks saved to blob storage successfully');
+    return true;
+  } catch (error) {
+    console.error('Error saving tasks to blob:', error);
+    throw error;
+  }
+};
+
+// Load tasks from Azure Blob Storage  
+export const loadTasksFromBlob = async () => {
+  if (!blobConfig.enabled) {
+    throw new Error('Blob storage not configured');
+  }
+
+  try {
+    const blobUrl = `http://localhost:10000/devstoreaccount1/tasks/tasks.csv`;    
+    const headers = await generateAuthHeader('GET', blobUrl);
+    
+    const response = await fetch(blobUrl, {
+      method: 'GET',
+      headers
+    });
+    
+    if (response.status === 404) {
+      // File doesn't exist yet, return empty array
+      return [];
+    }
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+    }
+
+    const csvContent = await response.text();
+    const tasks = csvToTasks(csvContent);
+    console.log('Tasks loaded from blob storage successfully');
+    return tasks;
+  } catch (error) {
+    console.error('Error loading tasks from blob:', error);
+    throw error;
+  }
+};
+
 export const saveTasks = async (tasks) => {
   try {
     const csvContent = tasksToCSV(tasks);
     localStorage.setItem('plannerTasks', csvContent);
+    
+    // Also save to blob storage if configured
+    if (blobConfig.enabled) {
+      try {
+        await saveTasksToBlob(tasks);
+      } catch (blobError) {
+        console.warn('Failed to save to blob storage, saved to localStorage only:', blobError);
+      }
+    }
+    
     return true;
   } catch (error) {
     console.error('Error saving tasks:', error);
@@ -283,11 +481,28 @@ export const saveTasks = async (tasks) => {
 };
 
 export const loadTasks = async () => {
+  // Load blob configuration first
+  loadBlobConfig();
+  
   try {
+    // Try to load from blob storage first if configured
+    if (blobConfig.enabled) {
+      try {
+        const blobTasks = await loadTasksFromBlob();
+        console.log('Loaded tasks from blob storage');
+        return blobTasks;
+      } catch (blobError) {
+        console.warn('Failed to load from blob storage, falling back to localStorage:', blobError);
+      }
+    }
+    
+    // Fallback to localStorage
     const csvContent = localStorage.getItem('plannerTasks');
     if (csvContent) {
+      console.log('Loaded tasks from localStorage');
       return csvToTasks(csvContent);
     }
+    
     return [];
   } catch (error) {
     console.error('Error loading tasks:', error);
