@@ -13,6 +13,7 @@ import {
   getTaskStats,
   loadTasks,
   saveTasks,
+  exportTasks,
   importTasksFromFile
 } from './utils';
 import './TaskManager.css';
@@ -21,53 +22,59 @@ import './TaskManager.css';
 const TaskChart = ({ stats, viewType }) => {
   const { total, completed, pending, completionRate } = stats;
   
-  const circumference = 2 * Math.PI * 45;
+  const circumference = 2 * Math.PI * 38;
   const strokeDasharray = `${(completionRate / 100) * circumference} ${circumference}`;
   
   return (
     <div className="task-chart">
       <div className="chart-container">
-        <svg className="progress-ring" width="120" height="120">
+        <svg className="progress-ring" width="100" height="100">
           <circle
             className="progress-ring-circle-bg"
             stroke="#e2e8f0"
-            strokeWidth="8"
+            strokeWidth="6"
             fill="transparent"
-            r="45"
-            cx="60"
-            cy="60"
+            r="38"
+            cx="50"
+            cy="50"
           />
           <circle
             className="progress-ring-circle"
             stroke="#10b981"
-            strokeWidth="8"
+            strokeWidth="6"
             fill="transparent"
-            r="45"
-            cx="60"
-            cy="60"
+            r="38"
+            cx="50"
+            cy="50"
             strokeDasharray={strokeDasharray}
             strokeDashoffset="0"
-            transform="rotate(-90 60 60)"
+            transform="rotate(-90 50 50)"
           />
-          <text x="60" y="65" textAnchor="middle" className="progress-text">
+          <text x="50" y="55" textAnchor="middle" className="progress-text">
             {completionRate}%
           </text>
         </svg>
         <div className="chart-stats">
           <div className="stat-item">
             <span className="stat-icon">📋</span>
-            <span className="stat-label">Total</span>
-            <span className="stat-value">{total}</span>
+            <div className="stat-details">
+              <span className="stat-label">Total</span>
+              <span className="stat-value">{total}</span>
+            </div>
           </div>
           <div className="stat-item">
             <span className="stat-icon">✅</span>
-            <span className="stat-label">Done</span>
-            <span className="stat-value">{completed}</span>
+            <div className="stat-details">
+              <span className="stat-label">Done</span>
+              <span className="stat-value">{completed}</span>
+            </div>
           </div>
           <div className="stat-item">
             <span className="stat-icon">⏳</span>
-            <span className="stat-label">Pending</span>
-            <span className="stat-value">{pending}</span>
+            <div className="stat-details">
+              <span className="stat-label">Pending</span>
+              <span className="stat-value">{pending}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -237,6 +244,10 @@ const TaskManager = () => {
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [newTaskDescription, setNewTaskDescription] = useState('');
   const [newTaskDueDate, setNewTaskDueDate] = useState('');
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem('taskPlannerTheme');
+    return saved ? saved === 'dark' : true; // default to dark
+  });
 
   // Load tasks on component mount
   useEffect(() => {
@@ -255,6 +266,16 @@ const TaskManager = () => {
     };
     initializeTasks();
   }, []);
+
+  // Theme management
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+    localStorage.setItem('taskPlannerTheme', isDarkMode ? 'dark' : 'light');
+  }, [isDarkMode]);
+
+  const toggleTheme = () => {
+    setIsDarkMode(prev => !prev);
+  };
 
   // Save tasks to storage
   const saveTasksToStorage = useCallback(async (updatedTasks) => {
@@ -417,7 +438,7 @@ const TaskManager = () => {
   };
 
   const handleExportTasks = () => {
-    saveTasks(tasks);
+    exportTasks(tasks);
   };
 
   // Get date range for display
@@ -454,181 +475,193 @@ const TaskManager = () => {
     <div className="task-manager">
       {/* Header */}
       <header className="app-header">
-        <h1 className="app-title">📋 Task Planner</h1>
-        <p className="app-description">Organize your life, one task at a time</p>
-      </header>
-
-      {/* Date Navigator */}
-      <div className="date-navigator">
-        <div className="view-type-selector">
-          <button className={`view-btn ${viewType === 'week' ? 'active' : ''}`} onClick={() => setViewType('week')}>
-            📅 Week
-          </button>
-          <button className={`view-btn ${viewType === 'month' ? 'active' : ''}`} onClick={() => setViewType('month')}>
-            🗓️ Month
-          </button>
-          <button className={`view-btn ${viewType === 'year' ? 'active' : ''}`} onClick={() => setViewType('year')}>
-            📆 Year
-          </button>
-        </div>
-
-        <div className="date-controls">
-          <button onClick={() => handleNavigate('prev')} className="nav-btn" title={`Previous ${viewType}`}>
-            ⬅️
-          </button>
-          
-          <div className="date-display">
-            <span className="date-range">{formatDateRange(range, viewType)}</span>
-            {!isCurrentView && (
-              <button onClick={goToToday} className="today-btn" title="Go to current period">
-                🏠 Today
-              </button>
-            )}
+        <div className="header-content">
+          <div className="header-text">
+            <h1 className="app-title">📋 Task Planner</h1>
+            <p className="app-description">Organize your life, one task at a time</p>
           </div>
           
-          <button onClick={() => handleNavigate('next')} className="nav-btn" title={`Next ${viewType}`}>
-            ➡️
+          <button onClick={toggleTheme} className="theme-toggle" title={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}>
+            {isDarkMode ? '☀️' : '🌙'}
           </button>
         </div>
-
+        
+        {/* Period Indicator in Header */}
         <div className="period-indicator">
           {isCurrentView ? (
-            <span className="current-indicator">🟢 Current {viewType}</span>
+            <span className="current-indicator">⚡ Current {viewType}</span>
           ) : (
             <span className="history-indicator">📜 History - {viewType}</span>
           )}
         </div>
-      </div>
+      </header>
 
-      {/* Task Statistics Chart */}
-      <TaskChart stats={taskStats} viewType={viewType} />
-
-      {/* Task Form - Only show in current view */}
-      {isCurrentView && (
-        <div className="task-form">
-          <div className="form-header">
-            <button onClick={() => setShowAddTask(!showAddTask)} className="btn-add-task">
-              {showAddTask ? '❌ Cancel' : '➕ Add New Task'}
+      {/* Top Controls Row */}
+      <div className="top-controls">
+        {/* Date Navigator */}
+        <div className="date-navigator">
+          <div className="view-type-selector">
+            <button className={`view-btn ${viewType === 'week' ? 'active' : ''}`} onClick={() => setViewType('week')}>
+              📅 Week
             </button>
-            
-            <div className="form-actions">
-              <button onClick={handleExportTasks} className="btn-export" title="Export tasks to CSV">
-                💾 Export
-              </button>
-              <label className="btn-import">
-                📂 Import
-                <input
-                  type="file"
-                  accept=".csv"
-                  onChange={(e) => {
-                    const file = e.target.files[0];
-                    if (file && file.type === 'text/csv') {
-                      handleImportTasks(file);
-                    }
-                    e.target.value = '';
-                  }}
-                  style={{ display: 'none' }}
-                />
-              </label>
-            </div>
+            <button className={`view-btn ${viewType === 'month' ? 'active' : ''}`} onClick={() => setViewType('month')}>
+              🗓️ Month
+            </button>
+            <button className={`view-btn ${viewType === 'year' ? 'active' : ''}`} onClick={() => setViewType('year')}>
+              📆 Year
+            </button>
           </div>
 
-          {showAddTask && (
-            <form onSubmit={handleAddTask} className="add-task-form">
-              <input
-                type="text"
-                value={newTaskTitle}
-                onChange={(e) => setNewTaskTitle(e.target.value)}
-                placeholder="📝 Enter task title..."
-                className="form-input title-input"
-                required
-                autoFocus
-              />
-              <textarea
-                value={newTaskDescription}
-                onChange={(e) => setNewTaskDescription(e.target.value)}
-                placeholder="📄 Enter task description (optional)..."
-                className="form-input description-input"
-                rows="3"
-              />
-              <div className="form-row">
-                <label className="form-label">
-                  📅 Due Date (optional):
+          <div className="date-controls">
+            <button onClick={() => handleNavigate('prev')} className="nav-btn" title={`Previous ${viewType}`}>
+              ⬅️
+            </button>
+            
+            <div className="date-display">
+              <span className="date-range">{formatDateRange(range, viewType)}</span>
+            </div>
+            
+            <button onClick={() => handleNavigate('next')} className="nav-btn" title={`Next ${viewType}`}>
+              ➡️
+            </button>
+          </div>
+
+          {!isCurrentView && (
+            <button onClick={goToToday} className="today-btn" title="Go to current period">
+              🏠 Today
+            </button>
+          )}
+        </div>
+
+        {/* Task Statistics Chart */}
+        <TaskChart stats={taskStats} viewType={viewType} />
+      </div>
+
+      {/* Task Management Section */}
+      <div className="content-area">
+        {/* Task Form - Only show in current view */}
+        {isCurrentView && (
+          <div className="task-form">
+            <div className="form-header">
+              <button onClick={() => setShowAddTask(!showAddTask)} className="btn-add-task">
+                {showAddTask ? '❌ Cancel' : '➕ Add New Task'}
+              </button>
+              
+              <div className="form-actions">
+                <button onClick={handleExportTasks} className="btn-export" title="Export tasks to CSV">
+                  💾 Export
+                </button>
+                <label className="btn-import">
+                  📂 Import
                   <input
-                    type="date"
-                    value={newTaskDueDate}
-                    onChange={(e) => setNewTaskDueDate(e.target.value)}
-                    className="form-input date-input"
+                    type="file"
+                    accept=".csv"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file && file.type === 'text/csv') {
+                        handleImportTasks(file);
+                      }
+                      e.target.value = '';
+                    }}
+                    style={{ display: 'none' }}
                   />
                 </label>
               </div>
-              <div className="form-buttons">
-                <button type="submit" className="btn-submit" disabled={!newTaskTitle.trim()}>
-                  ➕ Add Task
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowAddTask(false);
-                    setNewTaskTitle('');
-                    setNewTaskDescription('');
-                    setNewTaskDueDate('');
-                  }}
-                  className="btn-cancel"
-                >
-                  ❌ Cancel
-                </button>
-              </div>
-            </form>
-          )}
-        </div>
-      )}
-
-      {/* Task List */}
-      <main className="main-content">
-        {loading ? (
-          <div className="task-list-loading">
-            <div className="loading-spinner"></div>
-            <p>⏳ Loading tasks...</p>
-          </div>
-        ) : filteredTasks.length === 0 ? (
-          <div className="task-list-empty">
-            <div className="empty-state">
-              <span className="empty-icon">📋</span>
-              <p className="empty-message">
-                {isCurrentView 
-                  ? `No tasks for this ${viewType}. Add some tasks to get started!` 
-                  : `No tasks found for this ${viewType}.`
-                }
-              </p>
             </div>
-          </div>
-        ) : (
-          <div className="task-list">
-            {filteredTasks.map((task) => (
-              <TaskItem
-                key={task.id}
-                task={task}
-                onToggle={toggleTask}
-                onEdit={editTask}
-                onDelete={deleteTask}
-                onAddSubtask={addSubtask}
-                onEditSubtask={editSubtask}
-                onDeleteSubtask={deleteSubtask}
-              />
-            ))}
+
+            {showAddTask && (
+              <form onSubmit={handleAddTask} className="add-task-form">
+                <input
+                  type="text"
+                  value={newTaskTitle}
+                  onChange={(e) => setNewTaskTitle(e.target.value)}
+                  placeholder="📝 Enter task title..."
+                  className="form-input title-input"
+                  required
+                  autoFocus
+                />
+                <textarea
+                  value={newTaskDescription}
+                  onChange={(e) => setNewTaskDescription(e.target.value)}
+                  placeholder="📄 Enter task description (optional)..."
+                  className="form-input description-input"
+                  rows="3"
+                />
+                <div className="form-row">
+                  <label className="form-label">
+                    📅 Due Date (optional):
+                    <input
+                      type="date"
+                      value={newTaskDueDate}
+                      onChange={(e) => setNewTaskDueDate(e.target.value)}
+                      className="form-input date-input"
+                    />
+                  </label>
+                </div>
+                <div className="form-buttons">
+                  <button type="submit" className="btn-submit" disabled={!newTaskTitle.trim()}>
+                    ➕ Add Task
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowAddTask(false);
+                      setNewTaskTitle('');
+                      setNewTaskDescription('');
+                      setNewTaskDueDate('');
+                    }}
+                    className="btn-cancel"
+                  >
+                    ❌ Cancel
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         )}
-      </main>
 
-      {/* Footer */}
-      <footer className="app-footer">
-        <div className="task-summary">
-          <span>📊 Total: {tasks.length}</span>
-          <span>🔍 Filtered: {filteredTasks.length}</span>
-          <span>✅ Completed: {filteredTasks.filter(t => t.completed).length}</span>
-        </div>
-      </footer>
+        {/* Task List */}
+        <main className="main-content">
+          {loading ? (
+            <div className="task-list-loading">
+              <div className="loading-spinner"></div>
+              <p>⏳ Loading tasks...</p>
+            </div>
+          ) : filteredTasks.length === 0 ? (
+            <div className="task-list-empty">
+              <div className="empty-state">
+                <span className="empty-icon">📋</span>
+                <p className="empty-message">
+                  {isCurrentView 
+                    ? `No tasks for this ${viewType}. Add some tasks to get started!` 
+                    : `No tasks found for this ${viewType}.`
+                  }
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="task-list">
+              <div className="task-summary-bar">
+                <span className="summary-item">📊 Total: {tasks.length}</span>
+                <span className="summary-item">🔍 Filtered: {filteredTasks.length}</span>
+                <span className="summary-item">✅ Completed: {filteredTasks.filter(t => t.completed).length}</span>
+              </div>
+              {filteredTasks.map((task) => (
+                <TaskItem
+                  key={task.id}
+                  task={task}
+                  onToggle={toggleTask}
+                  onEdit={editTask}
+                  onDelete={deleteTask}
+                  onAddSubtask={addSubtask}
+                  onEditSubtask={editSubtask}
+                  onDeleteSubtask={deleteSubtask}
+                />
+              ))}
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   );
 };

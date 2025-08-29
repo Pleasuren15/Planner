@@ -274,6 +274,17 @@ export const csvToTasks = (csvContent) => {
 export const saveTasks = async (tasks) => {
   try {
     const csvContent = tasksToCSV(tasks);
+    localStorage.setItem('plannerTasks', csvContent);
+    return true;
+  } catch (error) {
+    console.error('Error saving tasks:', error);
+    return false;
+  }
+};
+
+export const exportTasks = async (tasks) => {
+  try {
+    const csvContent = tasksToCSV(tasks);
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     
@@ -283,11 +294,9 @@ export const saveTasks = async (tasks) => {
     link.click();
     
     URL.revokeObjectURL(url);
-    
-    localStorage.setItem('plannerTasks', csvContent);
     return true;
   } catch (error) {
-    console.error('Error saving tasks:', error);
+    console.error('Error exporting tasks:', error);
     return false;
   }
 };
