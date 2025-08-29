@@ -1,5 +1,5 @@
-/* Modern Task Manager with Light/Dark Mode */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+/* Microsoft Fluent Design Task Manager */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap');
 
 * {
   box-sizing: border-box;
@@ -8,53 +8,69 @@
 }
 
 :root {
-  /* Light theme colors */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8fafc;
-  --bg-tertiary: #f1f5f9;
-  --border-color: #e2e8f0;
-  --text-primary: #1e293b;
-  --text-secondary: #64748b;
-  --text-muted: #94a3b8;
-  --accent-primary: #3b82f6;
-  --accent-hover: #2563eb;
-  --success-color: #10b981;
-  --success-hover: #059669;
-  --warning-color: #f59e0b;
-  --warning-hover: #d97706;
-  --danger-color: #ef4444;
-  --danger-hover: #dc2626;
-  --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.1);
-  --shadow-heavy: 0 8px 25px rgba(0, 0, 0, 0.15);
+  /* Microsoft Light Theme */
+  --ms-bg-primary: #ffffff;
+  --ms-bg-secondary: #f3f2f1;
+  --ms-bg-tertiary: #faf9f8;
+  --ms-bg-accent: #005a9e;
+  --ms-border-color: #d2d0ce;
+  --ms-text-primary: #323130;
+  --ms-text-secondary: #605e5c;
+  --ms-text-muted: #8a8886;
+  --ms-blue-primary: #0078d4;
+  --ms-blue-hover: #106ebe;
+  --ms-blue-light: #deecf9;
+  --ms-green-primary: #107c10;
+  --ms-green-hover: #0e6e0e;
+  --ms-green-light: #dff6dd;
+  --ms-orange-primary: #ff8c00;
+  --ms-orange-hover: #e97400;
+  --ms-orange-light: #fff4ce;
+  --ms-red-primary: #d13438;
+  --ms-red-hover: #b71c1c;
+  --ms-red-light: #fde7e9;
+  --ms-purple-primary: #5c2d91;
+  --ms-purple-hover: #4c1a74;
+  --ms-purple-light: #f3e9f7;
+  --ms-shadow-light: 0 1.6px 3.6px rgba(0, 0, 0, 0.132), 0 0.3px 0.9px rgba(0, 0, 0, 0.108);
+  --ms-shadow-medium: 0 3.2px 7.2px rgba(0, 0, 0, 0.132), 0 0.6px 1.8px rgba(0, 0, 0, 0.108);
+  --ms-shadow-heavy: 0 6.4px 14.4px rgba(0, 0, 0, 0.132), 0 1.2px 3.6px rgba(0, 0, 0, 0.108);
 }
 
 [data-theme="dark"] {
-  /* Dark theme colors */
-  --bg-primary: #0f172a;
-  --bg-secondary: #1e293b;
-  --bg-tertiary: #334155;
-  --border-color: #475569;
-  --text-primary: #f1f5f9;
-  --text-secondary: #cbd5e1;
-  --text-muted: #94a3b8;
-  --accent-primary: #3b82f6;
-  --accent-hover: #60a5fa;
-  --success-color: #10b981;
-  --success-hover: #34d399;
-  --warning-color: #f59e0b;
-  --warning-hover: #fbbf24;
-  --danger-color: #ef4444;
-  --danger-hover: #f87171;
-  --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.3);
-  --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.3);
-  --shadow-heavy: 0 8px 25px rgba(0, 0, 0, 0.4);
+  /* Microsoft Dark Theme */
+  --ms-bg-primary: #1f1f1f;
+  --ms-bg-secondary: #2d2d30;
+  --ms-bg-tertiary: #252526;
+  --ms-bg-accent: #0078d4;
+  --ms-border-color: #3e3e42;
+  --ms-text-primary: #ffffff;
+  --ms-text-secondary: #cccccc;
+  --ms-text-muted: #999999;
+  --ms-blue-primary: #0078d4;
+  --ms-blue-hover: #1890f1;
+  --ms-blue-light: rgba(0, 120, 212, 0.1);
+  --ms-green-primary: #107c10;
+  --ms-green-hover: #37d837;
+  --ms-green-light: rgba(16, 124, 16, 0.1);
+  --ms-orange-primary: #ff8c00;
+  --ms-orange-hover: #ffa500;
+  --ms-orange-light: rgba(255, 140, 0, 0.1);
+  --ms-red-primary: #f85149;
+  --ms-red-hover: #ff6b6b;
+  --ms-red-light: rgba(248, 81, 73, 0.1);
+  --ms-purple-primary: #8b5cf6;
+  --ms-purple-hover: #a78bfa;
+  --ms-purple-light: rgba(139, 92, 246, 0.1);
+  --ms-shadow-light: 0 1.6px 3.6px rgba(0, 0, 0, 0.3), 0 0.3px 0.9px rgba(0, 0, 0, 0.2);
+  --ms-shadow-medium: 0 3.2px 7.2px rgba(0, 0, 0, 0.3), 0 0.6px 1.8px rgba(0, 0, 0, 0.2);
+  --ms-shadow-heavy: 0 6.4px 14.4px rgba(0, 0, 0, 0.3), 0 1.2px 3.6px rgba(0, 0, 0, 0.2);
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: var(--bg-primary);
-  color: var(--text-primary);
+  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--ms-bg-primary);
+  color: var(--ms-text-primary);
   min-height: 100vh;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
@@ -72,13 +88,14 @@ body {
   align-items: center;
 }
 
-/* Header */
+/* Header - Microsoft Style */
 .app-header {
   margin-bottom: 16px;
-  background: var(--bg-secondary);
-  border-radius: 12px;
+  background: var(--ms-bg-secondary);
+  border-radius: 8px;
   padding: 20px;
-  box-shadow: var(--shadow-light);
+  box-shadow: var(--ms-shadow-light);
+  border-left: 4px solid var(--ms-blue-primary);
 }
 
 .header-content {
@@ -94,49 +111,52 @@ body {
 
 .app-title {
   font-size: 2rem;
-  font-weight: 700;
-  color: var(--text-primary);
+  font-weight: 800;
+  color: var(--ms-text-primary);
   margin-bottom: 4px;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .app-description {
   font-size: 1rem;
-  color: var(--text-secondary);
+  color: var(--ms-text-secondary);
+  font-weight: 500;
 }
 
 .theme-toggle {
-  background: var(--bg-tertiary);
-  border: none;
-  border-radius: 8px;
+  background: var(--ms-bg-tertiary);
+  border: 1px solid var(--ms-border-color);
+  border-radius: 4px;
   padding: 8px;
   font-size: 1.2rem;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: var(--shadow-light);
+  transition: all 0.2s ease;
+  color: var(--ms-text-primary);
 }
 
 .theme-toggle:hover {
-  background: var(--accent-primary);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-medium);
+  background: var(--ms-blue-primary);
+  color: white;
+  border-color: var(--ms-blue-primary);
 }
 
 .period-indicator {
   text-align: center;
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 0.9rem;
 }
 
 .current-indicator {
-  color: var(--success-color);
-  font-weight: 600;
+  color: var(--ms-green-primary);
+  font-weight: 700;
 }
 
 .history-indicator {
-  color: var(--text-muted);
+  color: var(--ms-text-muted);
   font-style: italic;
 }
 
-/* Top Controls Layout - Equal Heights */
+/* Top Controls Layout - Microsoft Fluent Grid */
 .top-controls {
   display: grid;
   grid-template-columns: 1fr 320px;
@@ -145,47 +165,50 @@ body {
   align-items: stretch;
 }
 
-/* Date Navigator */
+/* Date Navigator - Microsoft Card Style */
 .date-navigator {
-  background: var(--bg-secondary);
-  border-radius: 12px;
+  background: var(--ms-bg-secondary);
+  border-radius: 8px;
   padding: 16px;
-  box-shadow: var(--shadow-light);
+  box-shadow: var(--ms-shadow-light);
+  border: 1px solid var(--ms-border-color);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 180px;
+  min-height: 160px;
 }
 
 .view-type-selector {
   display: flex;
   justify-content: center;
-  gap: 6px;
+  gap: 4px;
   margin-bottom: 12px;
 }
 
 .view-btn {
   padding: 6px 14px;
-  border: none;
-  background: var(--bg-tertiary);
-  border-radius: 8px;
-  color: var(--text-primary);
+  border: 1px solid var(--ms-border-color);
+  background: var(--ms-bg-tertiary);
+  border-radius: 4px;
+  color: var(--ms-text-primary);
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: 500;
+  transition: all 0.2s ease;
+  font-weight: 600;
   font-size: 0.85rem;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .view-btn:hover {
-  background: var(--accent-primary);
-  color: white;
-  transform: translateY(-1px);
+  background: var(--ms-blue-light);
+  border-color: var(--ms-blue-primary);
+  color: var(--ms-blue-primary);
 }
 
 .view-btn.active {
-  background: var(--accent-primary);
+  background: var(--ms-blue-primary);
+  border-color: var(--ms-blue-primary);
   color: white;
-  box-shadow: var(--shadow-medium);
+  box-shadow: var(--ms-shadow-light);
 }
 
 .date-controls {
@@ -197,22 +220,25 @@ body {
 }
 
 .nav-btn {
-  background: var(--bg-tertiary);
-  border: none;
-  border-radius: 8px;
+  background: var(--ms-bg-tertiary);
+  border: 1px solid var(--ms-border-color);
+  border-radius: 4px;
   padding: 8px;
   cursor: pointer;
   font-size: 1.1rem;
-  transition: all 0.3s ease;
-  color: var(--text-primary);
-  box-shadow: var(--shadow-light);
+  transition: all 0.2s ease;
+  color: var(--ms-text-primary);
+  min-width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .nav-btn:hover {
-  background: var(--accent-primary);
+  background: var(--ms-blue-primary);
   color: white;
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-medium);
+  border-color: var(--ms-blue-primary);
 }
 
 .date-display {
@@ -222,39 +248,40 @@ body {
 
 .date-range {
   font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--text-primary);
+  font-weight: 700;
+  color: var(--ms-text-primary);
+  font-family: 'Montserrat', sans-serif;
 }
 
 .today-btn {
-  background: var(--success-color);
+  background: var(--ms-green-primary);
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 4px;
   padding: 6px 12px;
   font-size: 0.8rem;
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: 500;
-  box-shadow: var(--shadow-light);
+  transition: all 0.2s ease;
+  font-weight: 600;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .today-btn:hover {
-  background: var(--success-hover);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-medium);
+  background: var(--ms-green-hover);
 }
 
-/* Task Chart - Same height as date navigator */
+/* Task Chart - Microsoft Style */
 .task-chart {
-  background: var(--bg-secondary);
-  border-radius: 12px;
+  background: var(--ms-bg-secondary);
+  border-radius: 8px;
   padding: 16px;
-  box-shadow: var(--shadow-light);
+  box-shadow: var(--ms-shadow-light);
+  border: 1px solid var(--ms-border-color);
+  border-left: 4px solid var(--ms-purple-primary);
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-height: 180px;
+  min-height: 160px;
   width: 320px;
 }
 
@@ -272,27 +299,28 @@ body {
 }
 
 .progress-ring-circle-bg {
-  stroke: var(--border-color);
+  stroke: var(--ms-border-color);
   opacity: 0.3;
 }
 
 .progress-ring-circle {
-  transition: stroke-dasharray 0.8s ease;
+  transition: stroke-dasharray 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   stroke-linecap: round;
-  stroke: var(--success-color);
+  stroke: var(--ms-blue-primary);
 }
 
 .progress-text {
-  font-size: 1.2rem;
-  font-weight: 700;
-  fill: var(--text-primary);
+  font-size: 1.1rem;
+  font-weight: 800;
+  fill: var(--ms-text-primary);
   transform: rotate(90deg);
+  font-family: 'Montserrat', sans-serif;
 }
 
 .chart-stats {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .stat-item {
@@ -314,15 +342,19 @@ body {
 }
 
 .stat-label {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  font-weight: 500;
+  font-size: 0.7rem;
+  color: var(--ms-text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .stat-value {
   font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--text-primary);
+  font-weight: 800;
+  color: var(--ms-text-primary);
+  font-family: 'Montserrat', sans-serif;
 }
 
 /* Content Area */
@@ -332,12 +364,14 @@ body {
   gap: 16px;
 }
 
-/* Task Form */
+/* Task Form - Microsoft Card Style */
 .task-form {
-  background: var(--bg-secondary);
-  border-radius: 12px;
+  background: var(--ms-bg-secondary);
+  border-radius: 8px;
   padding: 16px;
-  box-shadow: var(--shadow-light);
+  box-shadow: var(--ms-shadow-light);
+  border: 1px solid var(--ms-border-color);
+  border-left: 4px solid var(--ms-green-primary);
 }
 
 .form-header {
@@ -350,83 +384,87 @@ body {
 }
 
 .btn-add-task {
-  background: var(--success-color);
+  background: var(--ms-green-primary);
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 4px;
   padding: 10px 16px;
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: var(--shadow-light);
+  transition: all 0.2s ease;
+  font-family: 'Montserrat', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .btn-add-task:hover {
-  background: var(--success-hover);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-medium);
+  background: var(--ms-green-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--ms-shadow-medium);
 }
 
 .form-actions {
   display: flex;
-  gap: 12px;
+  gap: 8px;
 }
 
 .btn-export, .btn-import {
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
-  border: none;
-  border-radius: 6px;
+  background: var(--ms-bg-tertiary);
+  color: var(--ms-text-primary);
+  border: 1px solid var(--ms-border-color);
+  border-radius: 4px;
   padding: 8px 12px;
   font-size: 0.8rem;
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: 500;
-  box-shadow: var(--shadow-light);
+  transition: all 0.2s ease;
+  font-weight: 600;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .btn-export:hover, .btn-import:hover {
-  background: var(--accent-primary);
+  background: var(--ms-blue-primary);
   color: white;
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-medium);
+  border-color: var(--ms-blue-primary);
 }
 
 .add-task-form {
-  background: var(--bg-tertiary);
-  border-radius: 8px;
+  background: var(--ms-bg-tertiary);
+  border-radius: 4px;
   padding: 12px;
   margin-top: 12px;
+  border: 1px solid var(--ms-border-color);
 }
 
 .form-input {
   width: 100%;
   padding: 10px 12px;
-  border: none;
-  border-radius: 6px;
+  border: 1px solid var(--ms-border-color);
+  border-radius: 4px;
   font-size: 0.9rem;
-  transition: all 0.3s ease;
-  background: var(--bg-primary);
-  color: var(--text-primary);
+  transition: all 0.2s ease;
+  background: var(--ms-bg-primary);
+  color: var(--ms-text-primary);
   margin-bottom: 10px;
-  box-shadow: var(--shadow-light);
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
 }
 
 .form-input:focus {
-  outline: 2px solid var(--accent-primary);
-  outline-offset: 2px;
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-medium);
+  outline: none;
+  border-color: var(--ms-blue-primary);
+  border-width: 2px;
+  box-shadow: 0 0 0 1px var(--ms-blue-primary);
 }
 
 .form-input::placeholder {
-  color: var(--text-muted);
+  color: var(--ms-text-muted);
+  font-weight: 400;
 }
 
 .description-input {
   resize: vertical;
-  font-family: inherit;
+  font-family: 'Montserrat', sans-serif;
   min-height: 60px;
 }
 
@@ -440,10 +478,11 @@ body {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  font-weight: 500;
-  color: var(--text-primary);
+  font-weight: 600;
+  color: var(--ms-text-primary);
   flex: 1;
   font-size: 0.85rem;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .form-buttons {
@@ -453,56 +492,56 @@ body {
 }
 
 .btn-submit {
-  background: var(--success-color);
+  background: var(--ms-blue-primary);
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 4px;
   padding: 8px 14px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   font-size: 0.85rem;
-  box-shadow: var(--shadow-light);
+  font-family: 'Montserrat', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .btn-submit:hover:not(:disabled) {
-  background: var(--success-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-medium);
+  background: var(--ms-blue-hover);
+  box-shadow: var(--ms-shadow-medium);
 }
 
 .btn-submit:disabled {
-  background: var(--text-muted);
+  background: var(--ms-text-muted);
   cursor: not-allowed;
-  transform: none;
 }
 
 .btn-cancel {
-  background: var(--bg-primary);
-  color: var(--text-secondary);
-  border: none;
-  border-radius: 6px;
+  background: var(--ms-bg-primary);
+  color: var(--ms-text-secondary);
+  border: 1px solid var(--ms-border-color);
+  border-radius: 4px;
   padding: 8px 14px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: 500;
+  transition: all 0.2s ease;
+  font-weight: 600;
   font-size: 0.85rem;
-  box-shadow: var(--shadow-light);
+  font-family: 'Montserrat', sans-serif;
 }
 
 .btn-cancel:hover {
-  background: var(--danger-color);
+  background: var(--ms-red-primary);
   color: white;
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-medium);
+  border-color: var(--ms-red-primary);
 }
 
-/* Main Content */
+/* Main Content - Microsoft Card */
 .main-content {
-  background: var(--bg-secondary);
-  border-radius: 12px;
+  background: var(--ms-bg-secondary);
+  border-radius: 8px;
   padding: 16px;
-  box-shadow: var(--shadow-light);
+  box-shadow: var(--ms-shadow-light);
+  border: 1px solid var(--ms-border-color);
   min-height: 300px;
 }
 
@@ -512,14 +551,16 @@ body {
   align-items: center;
   padding: 10px 12px;
   margin-bottom: 12px;
-  background: var(--bg-tertiary);
-  border-radius: 8px;
+  background: var(--ms-blue-light);
+  border-radius: 4px;
   font-size: 0.8rem;
+  border: 1px solid rgba(0, 120, 212, 0.2);
 }
 
 .summary-item {
-  color: var(--text-secondary);
-  font-weight: 500;
+  color: var(--ms-blue-primary);
+  font-weight: 700;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .task-list-loading {
@@ -528,14 +569,14 @@ body {
   align-items: center;
   justify-content: center;
   padding: 40px 20px;
-  color: var(--text-secondary);
+  color: var(--ms-text-secondary);
 }
 
 .loading-spinner {
   width: 32px;
   height: 32px;
-  border: 3px solid var(--border-color);
-  border-top: 3px solid var(--accent-primary);
+  border: 3px solid var(--ms-border-color);
+  border-top: 3px solid var(--ms-blue-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 12px;
@@ -566,43 +607,46 @@ body {
 
 .empty-message {
   font-size: 1rem;
-  color: var(--text-secondary);
-  font-weight: 500;
+  color: var(--ms-text-secondary);
+  font-weight: 600;
+  font-family: 'Montserrat', sans-serif;
 }
 
-/* Task Items - Cleaner design */
+/* Task Items - Microsoft Fluent Design */
 .task-item {
-  background: var(--bg-tertiary);
-  border-radius: 8px;
-  margin-bottom: 10px;
-  transition: all 0.3s ease;
+  background: var(--ms-bg-tertiary);
+  border-radius: 4px;
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
   overflow: hidden;
+  border: 1px solid var(--ms-border-color);
 }
 
 .task-item:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-medium);
+  transform: translateY(-1px);
+  box-shadow: var(--ms-shadow-medium);
+  border-color: var(--ms-blue-primary);
 }
 
 .task-item.completed {
   opacity: 0.6;
-  background: var(--bg-primary);
+  background: var(--ms-bg-primary);
 }
 
 .task-item.level-1 {
   margin-left: 0;
   margin-top: 6px;
   margin-bottom: 6px;
-  border-left: 3px solid var(--accent-primary);
-  background: rgba(59, 130, 246, 0.05);
+  border-left: 3px solid var(--ms-blue-primary);
+  background: var(--ms-blue-light);
 }
 
 .task-item.level-2 {
   margin-left: 16px;
   margin-top: 6px;
   margin-bottom: 6px;
-  border-left: 3px solid var(--success-color);
-  background: rgba(16, 185, 129, 0.05);
+  border-left: 3px solid var(--ms-green-primary);
+  background: var(--ms-green-light);
 }
 
 .task-main {
@@ -611,8 +655,6 @@ body {
   padding: 12px;
   gap: 10px;
 }
-
-/* Remove this since :has() isn't widely supported */
 
 .task-content {
   flex: 1;
@@ -624,29 +666,29 @@ body {
 .task-checkbox {
   width: 20px;
   height: 20px;
-  border: none;
-  border-radius: 6px;
-  background: var(--bg-primary);
+  border: 2px solid var(--ms-border-color);
+  border-radius: 2px;
+  background: var(--ms-bg-primary);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   flex-shrink: 0;
   margin-top: 1px;
   font-size: 12px;
   color: white;
   font-weight: bold;
-  box-shadow: var(--shadow-light);
 }
 
 .task-checkbox:hover {
-  transform: scale(1.1);
-  box-shadow: var(--shadow-medium);
+  border-color: var(--ms-blue-primary);
+  background: var(--ms-blue-light);
 }
 
 .task-checkbox.checked {
-  background: var(--success-color);
+  background: var(--ms-blue-primary);
+  border-color: var(--ms-blue-primary);
 }
 
 .task-info {
@@ -655,30 +697,34 @@ body {
 
 .task-title {
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
   margin: 0 0 4px 0;
-  color: var(--text-primary);
+  color: var(--ms-text-primary);
   line-height: 1.3;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .task-item.completed .task-title {
   text-decoration: line-through;
-  color: var(--text-muted);
+  color: var(--ms-text-muted);
 }
 
 .task-description {
-  color: var(--text-secondary);
+  color: var(--ms-text-secondary);
   margin: 0 0 6px 0;
   line-height: 1.4;
   font-size: 0.85rem;
+  font-weight: 500;
 }
 
 .task-meta {
   display: flex;
   gap: 12px;
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: var(--ms-text-muted);
   align-items: center;
+  font-weight: 600;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .task-actions {
@@ -688,44 +734,46 @@ body {
 }
 
 .task-actions button {
-  background: var(--bg-primary);
-  border: none;
+  background: var(--ms-bg-primary);
+  border: 1px solid var(--ms-border-color);
   font-size: 0.9rem;
   cursor: pointer;
   padding: 6px;
-  border-radius: 6px;
-  transition: all 0.3s ease;
+  border-radius: 2px;
+  transition: all 0.2s ease;
   width: 28px;
   height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: var(--shadow-light);
 }
 
 .task-actions button:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-medium);
+  box-shadow: var(--ms-shadow-light);
 }
 
 .btn-edit:hover {
-  background: var(--warning-color);
+  background: var(--ms-orange-primary);
   color: white;
+  border-color: var(--ms-orange-primary);
 }
 
 .btn-add-subtask:hover {
-  background: var(--accent-primary);
+  background: var(--ms-blue-primary);
   color: white;
+  border-color: var(--ms-blue-primary);
 }
 
 .btn-toggle-subtasks:hover {
-  background: var(--text-secondary);
+  background: var(--ms-purple-primary);
   color: white;
+  border-color: var(--ms-purple-primary);
 }
 
 .btn-delete:hover {
-  background: var(--danger-color);
+  background: var(--ms-red-primary);
   color: white;
+  border-color: var(--ms-red-primary);
 }
 
 /* Task editing */
@@ -735,83 +783,84 @@ body {
 
 .edit-title, .edit-description {
   width: 100%;
-  margin-bottom: 12px;
-  padding: 10px 16px;
-  border: none;
-  border-radius: 8px;
-  font-family: inherit;
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  transition: all 0.3s ease;
-  box-shadow: var(--shadow-light);
+  margin-bottom: 10px;
+  padding: 8px 12px;
+  border: 1px solid var(--ms-border-color);
+  border-radius: 4px;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
+  background: var(--ms-bg-primary);
+  color: var(--ms-text-primary);
+  transition: all 0.2s ease;
 }
 
 .edit-title:focus, .edit-description:focus {
-  outline: 2px solid var(--accent-primary);
-  outline-offset: 2px;
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-medium);
+  outline: none;
+  border-color: var(--ms-blue-primary);
+  border-width: 2px;
+  box-shadow: 0 0 0 1px var(--ms-blue-primary);
 }
 
 .edit-actions {
   display: flex;
-  gap: 10px;
+  gap: 8px;
 }
 
 .btn-save {
-  background: var(--success-color);
+  background: var(--ms-green-primary);
   color: white;
   border: none;
-  border-radius: 8px;
-  padding: 8px 16px;
+  border-radius: 4px;
+  padding: 6px 12px;
   cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  box-shadow: var(--shadow-light);
+  font-size: 0.8rem;
+  font-weight: 700;
+  transition: all 0.2s ease;
+  font-family: 'Montserrat', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .btn-save:hover {
-  background: var(--success-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-medium);
+  background: var(--ms-green-hover);
+  box-shadow: var(--ms-shadow-light);
 }
 
-/* Subtasks */
+/* Subtasks - Fixed Spacing */
 .subtasks {
-  background: var(--bg-primary);
-  margin-top: 8px;
-  padding: 8px;
-  border-top: 1px solid var(--border-color);
-  border-radius: 0 0 8px 8px;
+  background: var(--ms-bg-primary);
+  margin: 12px 0 0 0;
+  padding: 12px;
+  border-top: 2px solid var(--ms-border-color);
+  border-radius: 0 0 4px 4px;
 }
 
 .add-subtask {
   padding: 12px;
-  margin-top: 8px;
-  background: var(--bg-tertiary);
-  border-radius: 6px;
-  border: 1px solid var(--border-color);
+  margin: 12px 12px 0 12px;
+  background: var(--ms-bg-tertiary);
+  border-radius: 4px;
+  border: 1px solid var(--ms-border-color);
 }
 
 .subtask-input {
   width: 100%;
   padding: 8px 12px;
-  border: none;
-  border-radius: 6px;
+  border: 1px solid var(--ms-border-color);
+  border-radius: 4px;
   margin-bottom: 8px;
-  font-family: inherit;
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-  transition: all 0.3s ease;
-  box-shadow: var(--shadow-light);
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
+  background: var(--ms-bg-primary);
+  color: var(--ms-text-primary);
+  transition: all 0.2s ease;
 }
 
 .subtask-input:focus {
-  outline: 2px solid var(--accent-primary);
-  outline-offset: 2px;
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-medium);
+  outline: none;
+  border-color: var(--ms-blue-primary);
+  border-width: 2px;
+  box-shadow: 0 0 0 1px var(--ms-blue-primary);
 }
 
 .subtask-actions {
@@ -820,76 +869,69 @@ body {
 }
 
 .btn-add {
-  background: var(--accent-primary);
+  background: var(--ms-blue-primary);
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 4px;
   padding: 6px 12px;
   cursor: pointer;
   font-size: 0.8rem;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  box-shadow: var(--shadow-light);
+  font-weight: 700;
+  transition: all 0.2s ease;
+  font-family: 'Montserrat', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .btn-add:hover {
-  background: var(--accent-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-medium);
+  background: var(--ms-blue-hover);
+  box-shadow: var(--ms-shadow-light);
 }
 
 /* Error state */
 .error-message {
   text-align: center;
   padding: 40px;
-  background: var(--bg-secondary);
-  border-radius: 16px;
-  box-shadow: var(--shadow-medium);
+  background: var(--ms-bg-secondary);
+  border-radius: 8px;
+  box-shadow: var(--ms-shadow-medium);
+  border: 1px solid var(--ms-border-color);
+  border-left: 4px solid var(--ms-red-primary);
 }
 
 .error-message h2 {
-  color: var(--danger-color);
+  color: var(--ms-red-primary);
   margin-bottom: 16px;
-  font-size: 1.8rem;
+  font-size: 1.5rem;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
 }
 
 .btn-reload {
-  background: var(--accent-primary);
+  background: var(--ms-blue-primary);
   color: white;
   border: none;
-  border-radius: 10px;
+  border-radius: 4px;
   padding: 12px 24px;
   cursor: pointer;
   margin-top: 16px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  box-shadow: var(--shadow-light);
+  font-weight: 700;
+  transition: all 0.2s ease;
+  font-family: 'Montserrat', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .btn-reload:hover {
-  background: var(--accent-hover);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-medium);
-}
-
-/* Update chart stats layout */
-.stat-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 0;
-}
-
-.stat-details {
-  display: flex;
-  flex-direction: column;
+  background: var(--ms-blue-hover);
+  box-shadow: var(--ms-shadow-medium);
 }
 
 /* Responsive Design */
 @media (max-width: 1024px) {
   .top-controls {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 16px;
   }
   
   .task-chart {
@@ -899,7 +941,7 @@ body {
   .chart-container {
     justify-content: center;
     flex-direction: column;
-    gap: 24px;
+    gap: 20px;
   }
   
   .chart-stats {
@@ -910,36 +952,36 @@ body {
 
 @media (max-width: 768px) {
   .task-manager {
-    padding: 16px;
+    padding: 12px;
   }
 
   .app-title {
-    font-size: 2rem;
+    font-size: 1.6rem;
   }
 
   .app-description {
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
 
   .header-content {
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
     align-items: center;
   }
 
   .chart-stats {
-    gap: 16px;
+    gap: 12px;
   }
 
   .task-summary-bar {
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     align-items: center;
   }
 
   .task-main {
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
   }
 
   .task-actions {
@@ -956,33 +998,33 @@ body {
 
   .form-buttons {
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
   }
 
   .edit-actions {
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
   }
 
   .subtask-actions {
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
   }
 }
 
 @media (max-width: 480px) {
   .app-title {
-    font-size: 1.6rem;
+    font-size: 1.4rem;
   }
 
   .view-type-selector {
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
   }
 
   .date-controls {
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
   }
 
   .task-actions {
@@ -998,11 +1040,11 @@ body {
   }
 }
 
-/* Smooth animations */
+/* Microsoft Fluent Animations */
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -1011,16 +1053,32 @@ body {
 }
 
 .task-item {
-  animation: slideIn 0.3s ease;
+  animation: slideIn 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-/* Focus styles for accessibility */
+/* Focus styles - Microsoft Accessibility */
 button:focus-visible {
-  outline: 2px solid var(--accent-primary);
+  outline: 2px solid var(--ms-blue-primary);
   outline-offset: 2px;
 }
 
 input:focus-visible, textarea:focus-visible {
-  outline: 2px solid var(--accent-primary);
+  outline: 2px solid var(--ms-blue-primary);
   outline-offset: 2px;
+}
+
+/* Microsoft Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+}
+
+.btn-add-task, .btn-submit, .btn-add {
+  letter-spacing: 0.5px;
+}
+
+/* Microsoft Fluent Focus Effects */
+.task-item:focus-within {
+  border-color: var(--ms-blue-primary);
+  box-shadow: 0 0 0 1px var(--ms-blue-primary);
 }
