@@ -127,7 +127,9 @@ export const createTask = (title, description = '', dueDate = null, parentId = n
 export const updateTask = (task, updates) => ({
   ...task,
   ...updates,
-  updatedAt: createDateString()
+  updatedAt: createDateString(),
+  // Preserve original createdAt if not explicitly updated
+  createdAt: updates.createdAt || task.createdAt
 });
 
 export const toggleTaskCompletion = (task) => {

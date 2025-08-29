@@ -32,9 +32,6 @@
   --ms-purple-primary: #5c2d91;
   --ms-purple-hover: #8a63d2;
   --ms-purple-light: rgba(92, 45, 145, 0.1);
-  --ms-shadow-light: 0 2px 4px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
-  --ms-shadow-medium: 0 4px 8px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
-  --ms-shadow-heavy: 0 8px 16px rgba(0, 0, 0, 0.5), 0 4px 8px rgba(0, 0, 0, 0.4);
   --ms-modal-overlay: rgba(0, 0, 0, 0.6);
 }
 
@@ -63,10 +60,6 @@
   --ms-red-light: rgba(248, 81, 73, 0.1);
   --ms-purple-primary: #8b5cf6;
   --ms-purple-hover: #a78bfa;
-  --ms-purple-light: rgba(139, 92, 246, 0.1);
-  --ms-shadow-light: 0 1.6px 3.6px rgba(0, 0, 0, 0.3), 0 0.3px 0.9px rgba(0, 0, 0, 0.2);
-  --ms-shadow-medium: 0 3.2px 7.2px rgba(0, 0, 0, 0.3), 0 0.6px 1.8px rgba(0, 0, 0, 0.2);
-  --ms-shadow-heavy: 0 6.4px 14.4px rgba(0, 0, 0, 0.3), 0 1.2px 3.6px rgba(0, 0, 0, 0.2);
 }
 
 body {
@@ -93,18 +86,12 @@ body {
 /* Header - Microsoft Style */
 .app-header {
   margin-bottom: 16px;
-  background: var(--ms-bg-secondary);
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: var(--ms-shadow-light);
-  border-left: 4px solid var(--ms-blue-primary);
 }
 
 .header-content {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 12px;
 }
 
 .header-text {
@@ -123,23 +110,6 @@ body {
   font-size: 1rem;
   color: var(--ms-text-secondary);
   font-weight: 500;
-}
-
-.theme-toggle {
-  background: var(--ms-bg-tertiary);
-  border: 1px solid var(--ms-border-color);
-  border-radius: 4px;
-  padding: 8px;
-  font-size: 1.2rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: var(--ms-text-primary);
-}
-
-.theme-toggle:hover {
-  background: var(--ms-blue-primary);
-  color: white;
-  border-color: var(--ms-blue-primary);
 }
 
 .period-indicator {
@@ -366,16 +336,6 @@ body {
   gap: 16px;
 }
 
-/* Task Form - Microsoft Card Style */
-.task-form {
-  background: var(--ms-bg-secondary);
-  border-radius: 8px;
-  padding: 16px;
-  box-shadow: var(--ms-shadow-light);
-  border: 1px solid var(--ms-border-color);
-  border-left: 4px solid var(--ms-green-primary);
-}
-
 .form-header {
   display: flex;
   justify-content: space-between;
@@ -389,7 +349,6 @@ body {
   background: var(--ms-green-primary);
   color: white;
   border: none;
-  border-radius: 4px;
   padding: 10px 16px;
   font-size: 0.9rem;
   font-weight: 700;
@@ -543,7 +502,6 @@ body {
   border-radius: 8px;
   padding: 16px;
   box-shadow: var(--ms-shadow-light);
-  border: 1px solid var(--ms-border-color);
   min-height: 300px;
 }
 
@@ -967,7 +925,6 @@ body {
 
   .header-content {
     flex-direction: column;
-    gap: 12px;
     align-items: center;
   }
 
@@ -1248,13 +1205,11 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .settings-toggle:hover {
-  background: var(--ms-bg-tertiary);
   color: var(--ms-text-primary);
   transform: rotate(45deg);
 }
 
 .chart-toggle:hover {
-  background: var(--ms-bg-tertiary);
   color: var(--ms-text-primary);
   transform: scale(1.1);
 }
@@ -1362,15 +1317,6 @@ h1, h2, h3, h4, h5, h6 {
   animation: slideInFromLeft 0.8s ease-out 0.2s both;
 }
 
-.settings-toggle {
-  animation: slideInFromRight 0.8s ease-out 0.4s both;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.settings-toggle:hover {
-  animation: pulse 0.6s ease-in-out infinite;
-}
-
 .task-item {
   animation: slideInFromLeft 0.5s ease-out;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1394,7 +1340,7 @@ h1, h2, h3, h4, h5, h6 {
   overflow: hidden;
   padding: 12px 24px;
   border: none;
-  border-radius: 12px;
+  border-radius: 5px;
   background: linear-gradient(135deg, var(--ms-green-primary), #16a34a, #059669);
   background-size: 200% 200%;
   color: white;
@@ -1490,8 +1436,6 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .task-form {
-  margin-bottom: 24px;
-  padding: 16px;
   background: var(--ms-bg-secondary);
   border-radius: 12px;
   animation: slideIn 0.3s ease-out;
@@ -1863,7 +1807,7 @@ body {
 
 /* Search and Filter Styles */
 .search-section {
-  margin-bottom: 20px;
+  margin: 20px 0;
 }
 
 .search-box {

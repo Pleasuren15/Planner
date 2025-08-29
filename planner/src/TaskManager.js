@@ -161,7 +161,21 @@ const TaskItem = ({ task, onToggle, onEdit, onDelete, onAddSubtask, onEditSubtas
               {task.description && <p className="task-description">{task.description}</p>}
               <div className="task-meta">
                 <span className="task-date">
-                  🗓️ {new Date(task.createdAt).toLocaleDateString()}
+                  🗓️ {(() => {
+                    if (!task.createdAt) return 'No date';
+                    try {
+                      const date = new Date(task.createdAt);
+                      // Check if date is valid
+                      if (isNaN(date.getTime())) return 'Invalid date';
+                      return date.toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric' 
+                      });
+                    } catch (e) {
+                      return 'Invalid date';
+                    }
+                  })()}
                 </span>
                 <span className="task-category">
                   {task.category === 'work' ? '💼' : '👤'} {task.category || 'personal'}
@@ -535,9 +549,7 @@ const TaskManager = () => {
         
         {/* Status Indicator in Header */}
         <div className="period-indicator">
-          {viewType === 'all' ? (
-            <span className="current-indicator">📋 All Tasks</span>
-          ) : (
+          {viewType ===  (
             <span className={isCurrentView ? "current-indicator" : "history-indicator"}>
               {isCurrentView ? '⚡' : '📜'} {formatDateRange(
                 viewType === 'week' ? getCurrentWeekRange(currentDate) :
