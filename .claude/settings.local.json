@@ -13,7 +13,10 @@
       "Bash(timeout 15s npm start)",
       "Bash(rm -rf components hooks utils styles)",
       "Bash(timeout 10s npm start)",
-      "Bash(timeout 30s npm run build)"
+      "Bash(timeout 30s npm run build)",
+      "WebFetch(domain:docs.google.com)",
+      "WebFetch(domain:doc-08-18-sheets.googleusercontent.com)",
+      "Bash(curl -s \"https://docs.google.com/spreadsheets/d/e/2PACX-1vQZ2gQPaJqqi4LNdcC9I94enwBMbXU33gFzlLxHabv95zvmEL66PxvyIlfvxGvX9G8xagTzg0JRTcdM/pub?output=csv\")"
     ],
     "deny": []
   }

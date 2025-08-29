@@ -14,7 +14,9 @@ import {
   loadTasks,
   saveTasks,
   exportTasks,
-  importTasksFromFile
+  importTasksFromFile,
+  loadTasksFromGoogleSheets,
+  openGoogleSheetForUpdate
 } from './utils';
 import './TaskManager.css';
 
@@ -277,10 +279,21 @@ const TaskManager = () => {
     setIsDarkMode(prev => !prev);
   };
 
-  // Save tasks to storage
+  // Save tasks to storage and attempt Google Sheets sync
   const saveTasksToStorage = useCallback(async (updatedTasks) => {
     try {
       await saveTasks(updatedTasks);
+      
+      // Auto-copy to clipboard on every save for easy Google Sheets sync
+      try {
+        const utils = await import('./utils');
+        const csvContent = utils.tasksToCSV(updatedTasks);
+        await navigator.clipboard.writeText(csvContent);
+        console.info('📋 Tasks auto-copied to clipboard - paste into Google Sheets anytime!');
+      } catch (clipboardError) {
+        console.warn('Could not auto-copy to clipboard:', clipboardError);
+      }
+      
       setError(null);
     } catch (err) {
       setError('Failed to save tasks');
@@ -437,8 +450,67 @@ const TaskManager = () => {
     }
   };
 
-  const handleExportTasks = () => {
+  const handleExportTasks = async () => {
     exportTasks(tasks);
+    
+    // Also copy to clipboard for easy pasting
+    try {
+      const csvContent = await import('./utils').then(utils => utils.tasksToCSV(tasks));
+      await navigator.clipboard.writeText(csvContent);
+      alert('📊 Tasks exported as CSV file AND copied to clipboard! \n\n✨ Quick sync: Open your Google Sheet and paste (Ctrl+V)');
+    } catch (error) {
+      alert('📊 Tasks exported as CSV file! Import this into your Google Sheet.');
+    }
+  };
+
+  const handleSyncFromSheets = async () => {
+    try {
+      setLoading(true);
+      const sheetsData = await loadTasksFromGoogleSheets();
+      setTasks(sheetsData);
+      alert('🔄 Tasks synced from Google Sheets successfully!');
+      setError(null);
+    } catch (err) {
+      setError('Failed to sync from Google Sheets');
+      alert('❌ Error syncing from Google Sheets. Make sure your Google Sheet is published and accessible.');
+      console.error('Error syncing from Google Sheets:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleShowSetupGuide = () => {
+    const guide = `
+🚀 GOOGLE SHEETS SETUP GUIDE
+
+To enable automatic writing to Google Sheets:
+
+1️⃣ CREATE GOOGLE APPS SCRIPT:
+   • Go to https://script.google.com/
+   • Create new project
+   • Copy code from 'google-apps-script.js' file
+   • Replace Code.gs content
+
+2️⃣ DEPLOY WEB APP:
+   • Click Deploy → New deployment
+   • Type: Web app
+   • Execute as: Me
+   • Access: Anyone
+   • Deploy and copy the Web App URL
+
+3️⃣ UPDATE CONFIG:
+   • Edit src/utils.js
+   • Set APPS_SCRIPT_URL to your Web App URL
+
+4️⃣ SETUP GOOGLE SHEET:
+   • Add headers: id, title, description, completed, createdAt, updatedAt, dueDate, parentId
+   • Publish sheet: File → Share → Publish to web
+
+Your sheet: https://docs.google.com/spreadsheets/d/1eUBMFjVeYZLNXVDusTlMxwqNzra-FCZVdIME3daG2Jk/edit
+
+📝 Currently: Read from Google Sheets ✅, Write requires setup ⚠️
+    `;
+    alert(guide);
   };
 
   // Get date range for display
@@ -548,8 +620,17 @@ const TaskManager = () => {
               </button>
               
               <div className="form-actions">
-                <button onClick={handleExportTasks} className="btn-export" title="Export tasks to CSV">
-                  💾 Export
+                <button onClick={handleExportTasks} className="btn-export" title="Export CSV and copy to clipboard">
+                  📊 Copy to Sheets
+                </button>
+                <button onClick={() => openGoogleSheetForUpdate()} className="btn-open-sheet" title="Open your Google Sheet in new tab">
+                  🔗 Open Sheet
+                </button>
+                <button onClick={handleSyncFromSheets} className="btn-sync" title="Load latest data from Google Sheets">
+                  🔄 Sync from Sheets
+                </button>
+                <button onClick={handleShowSetupGuide} className="btn-setup" title="Show Google Sheets setup guide">
+                  ⚙️ Setup Guide
                 </button>
                 <label className="btn-import">
                   📂 Import
